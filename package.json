@@ -1,0 +1,21 @@
+{
+  "name": "cargo-tracking-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@tailwindcss/vite": "^4.0.0",
+    "nuxt": "^3.9.0",
+    "shadcn-nuxt": "^0.1.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.3.3",
+    "vue": "^3.4.10",
+    "vue-router": "^4.2.5"
+  }
+}
