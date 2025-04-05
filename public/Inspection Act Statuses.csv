@@ -1,0 +1,12 @@
+"OP_NAME","STATUS","COUNT(UAT.IED_ID)"
+System Create,Created,1796679
+Selectivity Modify,Created,1643273
+Control Results,Created,1619492
+Forced Modify,Created,1508600
+Modify,Created,671755
+Manual Examiner Assignment,Created,12027
+Unlock,Created,3888
+Lock,Created,1331
+Reroute to Red,Created,824
+Reroute to Yellow,Created,28
+Reroute to Green,Created,19

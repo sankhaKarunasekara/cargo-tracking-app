@@ -1,0 +1,35 @@
+"OP_NAME","STATUS","COUNT(UAT.IED_ID)"
+DOC Center Modification,Doc Checked,632390
+Register,Registered,483249
+Gate Acknowledgement,AcknowledgedGate,477537
+Scan Container,Registered,344177
+Scan Container,Doc Checked,198863
+Yard Acknowledgement,AcknowledgedYard,180654
+Yard Exit,ExitedYard,168815
+Gate Modification,AcknowledgedGate,3866
+Unlock,Registered,2801
+DOC Center Cancel,Cancelled,2324
+Unlock,Doc Checked,1650
+Detain Container,Doc Checked,1054
+Print,AcknowledgedGate,881
+DOC Center Modification,AcknowledgedYard,833
+Scan Container,AcknowledgedGate,628
+Print,AcknowledgedYard,583
+Detain Container,Registered,532
+DOC Center Modification,AcknowledgedGate,479
+Detain Container,AcknowledgedYard,379
+Print,ExitedYard,248
+Yard Modification,AcknowledgedYard,243
+Unlock,AcknowledgedGate,175
+Detain Container,AcknowledgedGate,153
+Unlock,AcknowledgedYard,114
+Scan Container,AcknowledgedYard,112
+Lock,Registered,64
+Print,Registered,58
+Lock,Doc Checked,30
+Lock,AcknowledgedYard,18
+Lock,ExitedYard,7
+Lock,AcknowledgedGate,6
+Lock,Cancelled,6
+Unlock,ExitedYard,6
+Unlock,Cancelled,5

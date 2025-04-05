@@ -1,0 +1,44 @@
+"OP_NAME","STATUS","COUNT(UAT.IED_ID)"
+Release Order (selectivity),Paid,1617253
+Post-Entry,Paid,1135470
+Payment,Paid,877844
+Validate and assess,Paid,844933
+Export release,Paid,686237
+Validate and assess,Assessed,685187
+System update,Paid,538919
+Totally exit,Totally exited,516282
+Validate,Registered,242915
+Post-Entry,Assessed,186722
+Assess Registered,Paid,168767
+Assess Registered,Assessed,68985
+Print Release Order,Paid,32400
+Cancel,Cancelled,29831
+Validate and assess with dig. sign,Assessed,25799
+Release Order (selectivity),Assessed,24421
+Exit,Exited,22230
+Export release,Assessed,4174
+Unlock,Paid,2936
+Exit note total cancel,Paid,1946
+Assess Registered (direct),Assessed,1573
+Assess Registered (direct),Paid,942
+Assess Registered with dig. sign,Assessed,693
+Unlock,Registered,672
+View Criteria,Paid,657
+Block,Paid,338
+Print Release Order,Assessed,295
+Unblock,Paid,270
+Unlock,Assessed,269
+Exit note partial cancel,Exited,130
+Lock,Paid,93
+Refund,Paid,69
+Clear declaration,Paid,55
+Block,Assessed,21
+Unblock,Assessed,11
+XML to T1,Assessed,11
+View Criteria,Assessed,9
+Block,Totally exited,9
+Unblock,Totally exited,7
+Lock,Assessed,7
+System re-route to green,Paid,2
+Unblock,Registered,1
+Block,Registered,1

@@ -1,0 +1,7 @@
+"OP_NAME","STATUS","COUNT(UAT.IED_ID)"
+Validate,Validated,538512
+Cancel,Cancelled,2167
+Unlock,Validated,41
+Modify,Validated,60
+Lock,Validated,13
+Exit of goods,Goods Exited,375104

@@ -1,1 +1,104 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 98%;
+    --foreground: 240 5.3% 26.1%;
+    --primary: 224.3 76.3% 48%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 240 5.9% 10%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --border: 220 13% 91%;
+    --ring: 224.3 76.3% 48%;
+    
+    /* Status colors */
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+    --warning: 38 92.7% 50.2%;
+    --warning-foreground: 355.7 100% 97.3%;
+    --danger: 0 84.2% 60.2%;
+    --danger-foreground: 355.7 100% 97.3%;
+    --info: 224.3 76.3% 48%;
+    --info-foreground: 0 0% 98%;
+    
+    /* Sidebar specific (keeping existing) */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Base colors */
+    --background: 240 5.9% 10%;
+    --foreground: 240 4.8% 95.9%;
+    --primary: 224.3 76.3% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 240 4.8% 95.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 240 4.8% 95.9%;
+    --border: 240 3.7% 15.9%;
+    --ring: 224.3 76.3% 48%;
+    
+    /* Status colors */
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
+    --warning: 38 92.7% 50.2%;
+    --warning-foreground: 26 83.3% 14.1%;
+    --danger: 0 84.2% 60.2%;
+    --danger-foreground: 0 85.7% 97.3%;
+    --info: 224.3 76.3% 48%;
+    --info-foreground: 210 20% 98%;
+    
+    /* Sidebar specific (keeping existing) */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* Common status colors for consistent styling */
+.status-bg-submitted {
+  background-color: hsl(var(--info));
+  color: hsl(var(--info-foreground));
+}
+
+.status-bg-review {
+  background-color: hsl(var(--warning));
+  color: hsl(var(--warning-foreground));
+}
+
+.status-bg-paid {
+  background-color: hsl(var(--success));
+  color: hsl(var(--success-foreground));
+}
+
+.status-bg-error {
+  background-color: hsl(var(--danger));
+  color: hsl(var(--danger-foreground));
+}
+
+/* Apply theme to the app */
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Add smooth transitions for theme changes */
+* {
+  transition-property: color, background-color, border-color;
+  transition-duration: 200ms;
+}

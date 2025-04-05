@@ -1,0 +1,17 @@
+"OP_NAME","STATUS","COUNT(UAT.IED_ID)"
+Registration,Registered,234574
+Acknowledge,Acknowledged,232821
+Archive,Archived,22575
+Retrieve,Registered,15272
+Retrieve,Acknowledged,9946
+Cancellation,Cancelled,783
+Retrieve,Archived,326
+BLVerify,Acknowledged,250
+Unlock,Registered,72
+Lock,Acknowledged,30
+Unlock,Acknowledged,29
+Lock,Registered,24
+BLVerify,Archived,8
+Verify,Registered,5
+Lock,Cancelled,5
+Unlock,Cancelled,4
