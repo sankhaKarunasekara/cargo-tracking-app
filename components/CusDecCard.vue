@@ -403,12 +403,12 @@ const features = {
     
     <!-- Desktop Card Layout (display only on large screens) -->
     <div class="hidden lg:flex">
-      <div class="flex-grow min-w-0 p-4">
+      <div class="flex-grow min-w-0 p-5">
         <!-- Top Section: Document info and status -->
         <div class="flex items-start justify-between">
           <div class="flex items-start">
-            <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-3 rounded-md bg-blue-50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mr-4 rounded-md bg-blue-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -417,77 +417,77 @@ const features = {
               </svg>
             </div>
             <div class="min-w-0">
-              <h3 class="text-base font-semibold text-gray-900 truncate">{{ cusdec.cusdecNumber }}</h3>
-              <div class="flex items-center mt-1 text-xs text-gray-500">
-                <span class="flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded font-medium">
+              <h3 class="text-lg font-semibold text-gray-900 truncate">{{ cusdec.cusdecNumber }}</h3>
+              <div class="flex items-center mt-1.5 text-sm text-gray-500">
+                <span class="flex items-center px-2 py-0.5 bg-blue-50 text-blue-600 rounded font-medium">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-0.5">
                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="13 2 13 8 19 8"></polyline>
                   </svg>
                   {{ blNumber }}
                 </span>
-                <span class="mx-1.5">•</span>
+                <span class="mx-2">•</span>
                 <span>{{ formattedDate }}</span>
               </div>
             </div>
           </div>
           
-          <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
+          <div :class="['px-3.5 py-1.5 text-sm font-medium rounded-full', getStatusColor()]">
             {{ cusdec.status }}
           </div>
         </div>
         
         <!-- Two-Column Content for Desktop -->
-        <div class="grid grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-2 gap-6 mt-6">
           <!-- Left Column: Company Info -->
-          <div class="space-y-3">
+          <div class="space-y-4">
             <div>
-              <p class="text-sm font-medium text-gray-500">Consignee</p>
-              <p class="text-sm text-gray-900">{{ cusdec.consigneeName }}</p>
+              <p class="text-sm font-medium text-gray-500 mb-1.5">Consignee</p>
+              <p class="text-base text-gray-900">{{ cusdec.consigneeName }}</p>
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-500">Declarant</p>
-              <p class="text-sm text-gray-900">{{ cusdec.declarantName }}</p>
+              <p class="text-sm font-medium text-gray-500 mb-1.5">Declarant</p>
+              <p class="text-base text-gray-900">{{ cusdec.declarantName }}</p>
             </div>
           </div>
           
           <!-- Right Column: Details -->
           <div>
             <!-- Container and Origin details -->
-            <div class="flex space-x-4 mb-3">
+            <div class="flex space-x-6 mb-4">
               <div>
-                <p class="flex items-center text-sm font-medium text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1 text-blue-600">
+                <p class="flex items-center text-sm font-medium text-gray-500 mb-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mr-1.5 text-blue-600">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
                   </svg>
                   Containers
                 </p>
-                <p class="text-sm font-semibold text-gray-900">{{ containerCount }}</p>
+                <p class="text-base font-semibold text-gray-900">{{ containerCount }}</p>
               </div>
               <div>
-                <p class="flex items-center text-sm font-medium text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 text-purple-600">
+                <p class="flex items-center text-sm font-medium text-gray-500 mb-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5 text-purple-600">
                     <path d="M12 12c2-2.96 0-7-1-8c0 3.038-1.773 4.741-3 6c-1.226 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.532-1.056-3.94-2-5c-1.786 3-2 4-4 2z"></path>
                   </svg>
                   Origin
                 </p>
-                <p class="text-sm text-gray-900">{{ countryOfExport }}</p>
+                <p class="text-base text-gray-900">{{ countryOfExport }}</p>
               </div>
             </div>
             
             <!-- System Tags - shown as a separate row -->
-            <div v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'" class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-gray-100">
+            <div v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'" class="flex flex-wrap gap-3 mt-3 pt-3 border-t border-gray-100">
               <!-- Yard Location -->
               <div 
                 :class="[
-                  'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium',
+                  'inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium',
                   getYardLocationColor.bg,
                   getYardLocationColor.text,
                   getYardLocationColor.border
                 ]"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
@@ -497,12 +497,12 @@ const features = {
               <!-- Channel -->
               <div 
                 :class="[
-                  'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium',
+                  'inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium',
                   getChannelColor.bg, 
                   getChannelColor.text
                 ]"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
                   <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
                   <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
@@ -516,21 +516,21 @@ const features = {
       
       <!-- Right Column for Action Buttons -->
       <div 
-        class="flex flex-col justify-center flex-shrink-0 w-56 p-4 border-l" 
+        class="flex flex-col justify-center flex-shrink-0 w-60 p-5 border-l" 
         :class="cusdec.status.toLowerCase() === 'waiting confirmation' ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-100'"
       >
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-4">
           <!-- Show Acknowledge button for Waiting Confirmation status -->
           <ButtonComponent
             v-if="cusdec.status.toLowerCase() === 'waiting confirmation'"
             variant="primary"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+            class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
             @click="handleAcknowledge"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg"
-              width="15" 
-              height="15"
+              width="16" 
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -548,12 +548,12 @@ const features = {
           <button 
             v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
             @click="handleViewTimeline"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
+            class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg"
-              width="15" 
-              height="15"
+              width="16" 
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -572,12 +572,12 @@ const features = {
           <button
             v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
             @click="handleViewContainers"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
+            class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg"
-              width="15" 
-              height="15"
+              width="16" 
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -595,10 +595,10 @@ const features = {
           
           <ButtonComponent
             variant="custom"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-blue-700 transition-colors border border-transparent rounded-md shadow-sm bg-blue-50 hover:bg-blue-100"
+            class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors border border-transparent rounded-md shadow-sm bg-blue-50 hover:bg-blue-100"
             @click="handleViewDetails"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
               <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
               <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"></path>
             </svg>

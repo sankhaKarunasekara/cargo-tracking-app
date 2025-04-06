@@ -295,16 +295,16 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
 </script>
 
 <template>
-  <div class="min-h-screen pb-20 bg-gray-50">
-    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+  <div class="min-h-screen pb-16 bg-gray-50">
+    <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <header class="flex items-center justify-between py-6">
-        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">CusDec Tracking</h1>
+      <header class="flex items-center justify-between py-4 mb-6 border-b border-gray-200 sm:py-6">
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">CusDec Tracking</h1>
         
         <div>
           <button 
             @click="toggleSidebar" 
-            class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -330,14 +330,14 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       </header>
       
       <!-- Status Tabs -->
-      <div class="p-3 mt-6 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+      <div class="p-2 mb-6 overflow-x-auto bg-white rounded-lg shadow-sm">
         <div class="flex space-x-2">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'
@@ -349,29 +349,29 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       </div>
       
       <!-- Filters panel (for mobile) -->
-      <div v-if="showSidebar && isMobile" class="p-5 mb-5 bg-white rounded-lg shadow-sm md:hidden">
-        <div class="space-y-5">
+      <div v-if="showSidebar && isMobile" class="p-4 mb-6 bg-white rounded-lg shadow-sm md:hidden">
+        <div class="space-y-4">
           <!-- Date Range Picker -->
-          <div class="mb-6">
-            <h3 class="mb-3 text-sm font-medium text-gray-700">Date Range</h3>
-            <div class="space-y-4">
+          <div class="mb-4">
+            <h3 class="mb-2 text-sm font-medium text-gray-700">Date Range</h3>
+            <div class="space-y-3">
               <div>
-                <label for="startDateMobile" class="block mb-2 text-sm text-gray-500">From</label>
+                <label for="startDateMobile" class="block mb-1 text-xs text-gray-500">From</label>
                 <input
                   id="startDateMobile"
                   type="date"
                   v-model="dateRange.startDate"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                 />
               </div>
               <div>
-                <label for="endDateMobile" class="block mb-2 text-sm text-gray-500">To</label>
+                <label for="endDateMobile" class="block mb-1 text-xs text-gray-500">To</label>
                 <input
                   id="endDateMobile"
                   type="date"
                   v-model="dateRange.endDate"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                 />
               </div>
@@ -379,14 +379,14 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
           </div>
           
           <!-- Text filters -->
-          <div class="space-y-5">
-            <div v-for="filter in filters" :key="filter.id" class="space-y-2">
+          <div class="space-y-4">
+            <div v-for="filter in filters" :key="filter.id" class="space-y-1">
               <label :for="filter.id + 'Mobile'" class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
               
               <select
                 v-if="filter.type === 'select'"
                 :id="filter.id + 'Mobile'"
-                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 :value="filter.value"
                 @change="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLSelectElement).value } : f))"
               >
@@ -405,7 +405,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                 :id="filter.id + 'Mobile'"
                 type="text"
                 :placeholder="filter.placeholder || `Enter ${filter.label}`"
-                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 :value="filter.value"
                 @input="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLInputElement).value } : f))"
               />
@@ -413,10 +413,10 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
           </div>
           
           <!-- Buttons -->
-          <div class="flex flex-col mt-6 space-y-3">
+          <div class="flex flex-col mt-5 space-y-2">
             <button 
               @click="handleSearch" 
-              class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -427,7 +427,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
             
             <button 
               @click="handleReset" 
-              class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                 <path d="M2 12C2 6.48 6.48 2 12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12"></path>
@@ -439,36 +439,36 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       </div>
     </div>
     
-      <div class="flex flex-col md:flex-row md:space-x-5">
+      <div class="flex flex-col md:flex-row md:space-x-6">
         <!-- Side Panel with filters (only visible on desktop) -->
         <div 
-          class="flex-shrink-0 hidden h-auto mb-5 transition-all duration-200 bg-white rounded-lg shadow-sm md:block md:w-80 xl:w-80 lg:w-64 md:sticky md:top-16 md:self-start"
+          class="flex-shrink-0 hidden h-auto mb-6 transition-all duration-200 bg-white rounded-lg shadow-sm md:block md:w-80 xl:w-80 lg:w-64 md:sticky md:top-24 md:self-start"
           v-if="!isMobile && showFilters"
         >
-          <div class="p-5 lg:p-4">
-            <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>
+          <div class="p-4">
+            <h2 class="mb-4 text-base font-medium">Advanced Filters</h2>
             
             <!-- Date Range Picker -->
-            <div class="mb-6">
-              <h3 class="mb-3 text-sm font-medium text-gray-700">Date Range</h3>
-              <div class="space-y-4">
+            <div class="mb-5">
+              <h3 class="mb-2 text-sm font-medium text-gray-700">Date Range</h3>
+              <div class="space-y-3">
                 <div>
-                  <label for="startDate" class="block mb-2 text-sm text-gray-500">From</label>
+                  <label for="startDate" class="block mb-1 text-xs text-gray-500">From</label>
                   <input
                     id="startDate"
                     type="date"
                     v-model="dateRange.startDate"
-                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                   />
                 </div>
                 <div>
-                  <label for="endDate" class="block mb-2 text-sm text-gray-500">To</label>
+                  <label for="endDate" class="block mb-1 text-xs text-gray-500">To</label>
                   <input
                     id="endDate"
                     type="date"
                     v-model="dateRange.endDate"
-                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                   />
                 </div>
@@ -476,14 +476,14 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
             </div>
             
             <!-- Text filters -->
-            <div class="space-y-5">
-              <div v-for="filter in filters" :key="filter.id" class="space-y-2">
+            <div class="space-y-4">
+              <div v-for="filter in filters" :key="filter.id" class="space-y-1">
                 <label :for="filter.id" class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
                 
                 <select
                   v-if="filter.type === 'select'"
                   :id="filter.id"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @change="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLSelectElement).value } : f))"
                 >
@@ -502,7 +502,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                   :id="filter.id"
                   type="text"
                   :placeholder="filter.placeholder || `Enter ${filter.label}`"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @input="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLInputElement).value } : f))"
                 />
@@ -510,10 +510,10 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col mt-8 space-y-3">
+            <div class="flex flex-col mt-6 space-y-2">
               <button 
                 @click="handleSearch" 
-                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <circle cx="11" cy="11" r="8"></circle>
@@ -524,7 +524,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
               
               <button 
                 @click="handleReset" 
-                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <path d="M2 12C2 6.48 6.48 2 12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12"></path>
@@ -541,7 +541,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
           <!-- Results area -->
           <div class="mt-0">
             <!-- Empty state with nice UI -->
-            <div v-if="filteredCusDecs.length === 0" class="py-10 text-center text-gray-500 bg-white rounded-lg shadow-sm">
+            <div v-if="filteredCusDecs.length === 0" class="py-12 text-center text-gray-500 bg-white rounded-lg shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-400">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -549,7 +549,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
               <p class="mb-4">No CusDec records found matching your filters</p>
               <button 
                 @click="handleReset" 
-                class="px-5 py-2.5 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+                class="px-5 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
               >
                 Reset Filters
               </button>
@@ -557,30 +557,30 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
             
             <div v-else>
               <!-- Results count indicator -->
-              <div class="flex flex-col mb-5 md:flex-row md:items-center md:justify-between">
+              <div class="flex flex-col mb-4 md:flex-row md:items-center md:justify-between">
                 <p class="mb-2 text-sm text-gray-500 md:mb-0">Found {{ filteredCusDecs.length }} CusDec records</p>
               </div>
               
               <!-- Card-based layout for all screen sizes -->
-              <div class="w-full space-y-5">
+              <div class="w-full space-y-4">
               <CusDecCard
                 v-for="cusdec in paginatedCusDecs"
                 :key="cusdec.id"
                 :cusdec="cusdec"
                 @view-timeline="handleViewTimeline"
                 @view-details="handleViewDetails"
-                class="mb-5" 
+                class="mb-4" 
               />
                 
                 <!-- Load More button (mobile only) -->
-                <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-8 mb-20">
+                <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-6 mb-16">
                   <button 
                     @click="loadMoreItems"
                     :disabled="isLoadingMore"
-                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                    class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
                   >
                     <template v-if="isLoadingMore">
-                      <svg class="w-5 h-5 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -593,12 +593,12 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                 </div>
                 
                 <!-- Pagination (desktop only) -->
-                <div v-if="!isMobile" class="flex justify-center mt-8">
+                <div v-if="!isMobile" class="flex justify-center mt-6">
                   <nav class="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                     <button 
                       @click="handlePageChange(currentPage - 1)" 
                       :disabled="currentPage === 1"
-                      class="inline-flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span class="sr-only">Previous</span>
                       <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -611,7 +611,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                       :key="page" 
                       @click="handlePageChange(page)" 
                       :class="[
-                        'inline-flex items-center px-4 py-2.5 text-sm font-medium border',
+                        'inline-flex items-center px-4 py-2 text-sm font-medium border',
                         currentPage === page 
                           ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
                           : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
@@ -623,7 +623,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                     <button 
                       @click="handlePageChange(currentPage + 1)" 
                       :disabled="currentPage === totalPages"
-                      class="inline-flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span class="sr-only">Next</span>
                       <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -633,8 +633,8 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                   </nav>
                 </div>
                 
-                <div v-if="!isMobile" class="flex items-center justify-center mt-3">
-                  <p class="text-sm text-gray-500">
+                <div v-if="!isMobile" class="flex items-center justify-center mt-2">
+                  <p class="text-xs text-gray-500">
                     Showing 
                     <span class="font-medium">{{ ((currentPage - 1) * itemsPerPage) + 1 }}</span> 
                     to 

@@ -311,17 +311,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen pb-20 bg-gray-50">
-    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+  <div class="min-h-screen pb-16 bg-gray-50">
+    <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <header class="flex items-center justify-between py-6">
-        <h1 class="text-2xl font-bold text-gray-900">Container Tracking</h1>
+      <header class="flex items-center justify-between py-4 mb-6 border-b border-gray-200 sm:py-6">
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">Container Tracking</h1>
         
         <div>
           <button 
             @click="toggleFilters" 
             :class="[
-              'flex items-center px-4 py-2 text-sm font-medium transition-colors border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+              'flex items-center px-3 py-2 text-sm font-medium transition-colors border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
               hasActiveFilters ? 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
             ]"
           >
@@ -376,14 +376,14 @@ onUnmounted(() => {
       </div>
       
       <!-- Status Tabs -->
-      <div class="p-3 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+      <div class="p-2 mb-6 overflow-x-auto bg-white rounded-lg shadow-sm">
         <div class="flex space-x-2">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'
@@ -395,7 +395,7 @@ onUnmounted(() => {
       </div>
       
       <!-- Filters panel -->
-      <div v-if="showFilters" class="p-5 mb-5 bg-white rounded-lg shadow-sm lg:hidden">
+      <div v-if="showFilters" class="p-4 mb-6 bg-white rounded-lg shadow-sm lg:hidden">
         <FilterSection
           :filters="filters"
           @update:filters="handleFilterUpdate"
@@ -404,49 +404,49 @@ onUnmounted(() => {
         />
       </div>
       
-      <div class="flex flex-col md:flex-row md:space-x-5">
+      <div class="flex flex-col md:flex-row md:space-x-6">
         <!-- Side Panel with filters (larger screens only) -->
         <div 
-          class="flex-shrink-0 hidden h-auto mb-5 transition-all duration-200 bg-white rounded-lg shadow-sm lg:block lg:w-64 xl:w-80 lg:sticky lg:top-16 lg:self-start"
+          class="flex-shrink-0 hidden h-auto mb-6 transition-all duration-200 bg-white rounded-lg shadow-sm lg:block lg:w-64 xl:w-80 lg:sticky lg:top-24 lg:self-start"
           v-if="showFilters"
         >
-          <div class="p-5 lg:p-4">
-            <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>
+          <div class="p-4">
+            <h2 class="mb-4 text-base font-medium">Advanced Filters</h2>
             
             <!-- Date Range Picker -->
-            <div class="mb-6">
-              <h3 class="mb-3 text-sm font-medium text-gray-700">Date Range</h3>
-              <div class="space-y-4">
+            <div class="mb-5">
+              <h3 class="mb-2 text-sm font-medium text-gray-700">Date Range</h3>
+              <div class="space-y-3">
                 <div>
-                  <label for="startDate" class="block mb-2 text-sm text-gray-500">From</label>
+                  <label for="startDate" class="block mb-1 text-xs text-gray-500">From</label>
                   <input
                     id="startDate"
                     type="date"
                     v-model="dateRange.startDate"
-                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label for="endDate" class="block mb-2 text-sm text-gray-500">To</label>
+                  <label for="endDate" class="block mb-1 text-xs text-gray-500">To</label>
                   <input
                     id="endDate"
                     type="date"
                     v-model="dateRange.endDate"
-                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
             </div>
             
             <!-- Text filters -->
-            <div class="space-y-5">
-              <div v-for="filter in filters" :key="filter.id" class="space-y-2">
+            <div class="space-y-4">
+              <div v-for="filter in filters" :key="filter.id" class="space-y-1">
                 <label :for="filter.id" class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
                 
                 <select
                   v-if="filter.type === 'select'"
                   :id="filter.id"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @change="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLSelectElement).value } : f))"
                 >
@@ -465,7 +465,7 @@ onUnmounted(() => {
                   :id="filter.id"
                   type="text"
                   :placeholder="filter.placeholder || `Enter ${filter.label}`"
-                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @input="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLInputElement).value } : f))"
                 />
@@ -473,10 +473,10 @@ onUnmounted(() => {
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col mt-8 space-y-3">
+            <div class="flex flex-col mt-6 space-y-2">
               <button 
                 @click="handleSearch" 
-                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <circle cx="11" cy="11" r="8"></circle>
@@ -487,7 +487,7 @@ onUnmounted(() => {
               
               <button 
                 @click="handleReset" 
-                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <path d="M2 12C2 6.48 6.48 2 12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12"></path>
@@ -500,10 +500,10 @@ onUnmounted(() => {
         </div>
       
         <!-- Main content area -->
-        <div class="flex-1 mt-5">
-          <div class="mt-5">
+        <div class="flex-1">
+          <div class="mt-0">
             <!-- Empty state -->
-            <div v-if="filteredContainers.length === 0" class="py-10 text-center text-gray-500 bg-white rounded-lg shadow-sm">
+            <div v-if="filteredContainers.length === 0" class="py-12 text-center text-gray-500 bg-white rounded-lg shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-400">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -511,7 +511,7 @@ onUnmounted(() => {
               <p class="mb-4">No containers found matching your filters</p>
               <button 
                 @click="handleReset" 
-                class="px-5 py-2.5 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+                class="px-5 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
               >
                 Reset Filters
               </button>
@@ -519,24 +519,24 @@ onUnmounted(() => {
             
             <div v-else>
               <!-- Results count -->
-              <div class="flex flex-col mb-5 md:flex-row md:items-center md:justify-between">
+              <div class="flex flex-col mb-4 md:flex-row md:items-center md:justify-between">
                 <p class="mb-2 text-sm text-gray-500 md:mb-0">Found {{ filteredContainers.length }} containers</p>
               </div>
               
               <!-- Container cards - this ref is used for automatic scrolling -->
-              <div class="w-full space-y-5" ref="containerListRef">
+              <div class="w-full space-y-4" ref="containerListRef">
                 <ContainerCard
                   v-for="container in paginatedContainers"
                   :key="container.id"
                   :container="container"
                   @viewDetails="handleViewDetails"
                   @viewTimeline="handleViewTimeline"
-                  class="mb-5"
+                  class="mb-4"
                 />
               </div>
               
               <!-- Pagination for desktop, Load More for mobile -->
-              <div class="flex justify-center mt-8">
+              <div class="flex justify-center mt-6">
                 <!-- Pagination (desktop only) -->
                 <div class="hidden md:block">
                   <Pagination
@@ -551,7 +551,7 @@ onUnmounted(() => {
                   v-if="hasMoreItems"
                   @click="loadMoreItems"
                   :disabled="isLoadingMore"
-                  class="w-full px-5 py-2.5 text-sm font-medium text-blue-600 border border-blue-300 rounded-md shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
+                  class="w-full px-5 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-md shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
                 >
                   <span v-if="isLoadingMore" class="flex items-center justify-center">
                     <svg class="w-4 h-4 mr-2 -ml-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -562,6 +562,19 @@ onUnmounted(() => {
                   </span>
                   <span v-else>Load More</span>
                 </button>
+              </div>
+              
+              <!-- Results summary text (desktop) -->
+              <div v-if="!isMobile && filteredContainers.length > 0" class="flex items-center justify-center mt-2">
+                <p class="text-xs text-gray-500">
+                  Showing 
+                  <span class="font-medium">{{ ((currentPage - 1) * itemsPerPage) + 1 }}</span> 
+                  to 
+                  <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredContainers.length) }}</span> 
+                  of 
+                  <span class="font-medium">{{ filteredContainers.length }}</span> 
+                  results
+                </p>
               </div>
             </div>
           </div>
