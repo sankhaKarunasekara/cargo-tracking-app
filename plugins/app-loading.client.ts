@@ -1,6 +1,11 @@
 import { defineNuxtPlugin } from '#app'
 
-export default defineNuxtPlugin((nuxtApp) => {
+interface NuxtApp {
+  hook: (hookName: string, callback: (...args: any[]) => void) => void;
+  [key: string]: any;
+}
+
+export default defineNuxtPlugin((nuxtApp: NuxtApp) => {
   if (typeof window !== 'undefined') {
     // Create loading indicator
     const loadingBar = document.createElement('div')
@@ -18,11 +23,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     `
     document.body.appendChild(loadingBar)
 
-    let timeout: any = null
+    let timeout: number | null = null
 
     // Show loading bar when page starts loading
     nuxtApp.hook('page:start', () => {
-      clearTimeout(timeout)
+      if (timeout !== null) clearTimeout(timeout)
       loadingBar.style.width = '0%'
       loadingBar.style.opacity = '1'
       
@@ -40,7 +45,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         clearInterval(interval)
         loadingBar.style.width = '100%'
         
-        timeout = setTimeout(() => {
+        timeout = window.setTimeout(() => {
           loadingBar.style.opacity = '0'
         }, 300)
       })
@@ -50,7 +55,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         loadingBar.style.width = '100%'
         loadingBar.style.backgroundColor = '#ef4444'
         
-        timeout = setTimeout(() => {
+        timeout = window.setTimeout(() => {
           loadingBar.style.opacity = '0'
           loadingBar.style.backgroundColor = '#3b82f6'
         }, 500)
