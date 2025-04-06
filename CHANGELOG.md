@@ -2,6 +2,37 @@
 
 All notable changes to the Cargo Tracking App will be documented in this file.
 
+## [0.1.4] - 2025-04-07
+
+### Added
+- Mobile-friendly status bar in PWA mode (standalone instead of fullscreen)
+- Light-themed status bar for better visibility
+- Loading indicator for page transitions
+
+### Changed
+- Updated TypeScript definitions for better type safety
+- Enhanced PWA manifest with shortcuts to key app sections
+
+## [0.1.3] - 2025-04-07
+
+### Added
+- Comprehensive favicon implementation with multiple sizes and formats
+- Enhanced meta tags for improved SEO and social sharing
+- PWA manifest screenshots and additional configuration
+
+## [0.1.2] - 2025-04-07
+
+### Added
+- Progressive Web App (PWA) support with full installation capability
+- Offline access to key functionality
+- Service worker for improved performance and caching
+
+## [0.1.1] - 2025-04-07
+
+### Changed
+- Updated package.json dependencies
+- Fixed critical issues in development environment
+
 ## [0.1.0] - 2023-05-22
 
 ### Added
