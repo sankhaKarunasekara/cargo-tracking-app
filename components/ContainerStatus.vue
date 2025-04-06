@@ -24,8 +24,8 @@ const handleClose = () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-white z-50 flex flex-col">
-    <div class="border-b p-4 flex justify-between items-center sticky top-0 bg-white z-10">
+  <div class="fixed inset-0 z-50 flex flex-col bg-white">
+    <div class="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
       <h2 class="text-lg font-medium text-gray-900">Container Status</h2>
       <button @click="handleClose" class="text-gray-500 hover:text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -35,10 +35,10 @@ const handleClose = () => {
       </button>
     </div>
     
-    <div class="p-4 overflow-y-auto flex-grow">
+    <div class="flex-grow p-4 overflow-y-auto">
       <div class="mb-4">
-        <h3 class="font-medium text-lg text-gray-900">{{ container.number }}</h3>
-        <div class="mt-1 inline-flex px-2 py-1 rounded-full text-sm" 
+        <h3 class="text-lg font-medium text-gray-900">{{ container.number }}</h3>
+        <div class="inline-flex px-2 py-1 mt-1 text-sm rounded-full" 
              :class="{
                'bg-blue-100 text-blue-800': ['scanning', 'registered'].includes(container.status.toLowerCase()),
                'bg-amber-100 text-amber-800': ['doc checked', 'acknowledgedgate', 'acknowledgedyard'].includes(container.status.toLowerCase()),
@@ -58,7 +58,7 @@ const handleClose = () => {
       </div>
     </div>
     
-    <div class="border-t p-4 sticky bottom-0 bg-white">
+    <div class="sticky bottom-0 p-4 bg-white border-t">
       <ButtonComponent variant="default" class="w-full" @click="handleClose">
         Close
       </ButtonComponent>
