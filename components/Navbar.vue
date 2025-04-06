@@ -32,33 +32,6 @@
         </div>
         
         <div class="flex items-center">
-          <!-- Search -->
-          <div class="flex items-center mx-2">
-            <div class="relative w-full max-w-xs">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  class="w-5 h-5 text-gray-400" 
-                  fill="none"
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    stroke-width="2" 
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-                  />
-                </svg>
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                class="block w-full py-2 pl-10 pr-3 text-sm border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            </div>
-          </div>
-          
           <!-- User avatar dropdown -->
           <div class="relative ml-3">
             <div>
@@ -178,26 +151,26 @@ const showMobileSidebar = ref(false)
 // User menu state
 const userMenuOpen = ref(false)
 
-// Try to get sidebar context, but don't fail if not available
-let sidebarToggle = () => {
-  showMobileSidebar.value = !showMobileSidebar.value
-}
-
-// Check if we're inside a SidebarProvider
+// Try to get sidebar context if it exists
+let sidebarContext = null
 try {
-  const { toggleSidebar } = useSidebar()
-  sidebarToggle = toggleSidebar
+  sidebarContext = useSidebar()
 } catch (error) {
-  // Use the default mobile sidebar toggle if outside a SidebarProvider
   console.warn('Sidebar provider not found, using fallback mobile navigation')
 }
 
+// Toggle sidebar function that handles both the app sidebar and mobile sidebar
 const toggleSidebar = () => {
-  sidebarToggle()
-  // Also toggle mobile sidebar for mobile view 
+  // Toggle mobile sidebar
   showMobileSidebar.value = !showMobileSidebar.value
+  
+  // Also toggle the app sidebar if it exists
+  if (sidebarContext) {
+    sidebarContext.toggleSidebar()
+  }
 }
 
+// Toggle user menu
 const toggleUserMenu = () => {
   userMenuOpen.value = !userMenuOpen.value
 }
@@ -207,6 +180,7 @@ const closeUserMenu = () => {
   userMenuOpen.value = false
 }
 
+// Close sidebar function
 const closeSidebar = () => {
   showMobileSidebar.value = false
 }

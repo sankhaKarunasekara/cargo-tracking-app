@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import CusDecCard from '../components/CusDecCard.vue'
-import Pagination from '../components/ui/pagination/pagination.vue'
+import { Pagination } from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card/card.vue'
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
 import { useRouter } from 'vue-router'
+import { useWindowSize } from '../lib/hooks/useWindowSize'
+import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
+import { getAllCusDecData, filterCusDecs, calculateCusDecStats } from '../lib/data/cusDecUtils'
+
+// Get window size and mobile status
+const { isMobile } = useWindowSize()
 
 // Define filter type
 type Filter = {
@@ -18,24 +24,12 @@ type Filter = {
   value: string;
 };
 
-// Define CusDec type
-type CusDec = {
-  id: string;
-  number: string;
-  declarantCompany: string;
-  consigneeCompany: string;
-  status: string;
-  officeCode?: string;
-  channel?: 'red' | 'yellow' | 'green' | 'blue';
-  containerCount?: number;
-  date?: string;
-};
-
 // Status tabs
 const statusTabs = ref([
   { id: 'all', label: 'All', active: true },
-  { id: 'waiting_confirmation', label: 'Waiting Confirmation', active: false },
+  { id: 'waiting confirmation', label: 'Waiting Confirmation', active: false },
   { id: 'processing', label: 'Processing', active: false },
+  { id: 'detained', label: 'Detained', active: false },
   { id: 'exited', label: 'Exited', active: false }
 ])
 
@@ -44,21 +38,26 @@ const activeStatusFilter = ref('all')
 
 // Set active status tab
 const setActiveStatus = (statusId: string) => {
+  console.log("Setting active status to:", statusId);
+  
   statusTabs.value = statusTabs.value.map(tab => ({
     ...tab,
     active: tab.id === statusId
   }))
   activeStatusFilter.value = statusId
+  
+  // When changing tabs, reset to page 1
+  currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
 }
 
-// Set default date range for last month
+// Set default date range for current year
 const getLastMonthDateRange = () => {
   const today = new Date()
   const endDate = today.toISOString().slice(0, 10) // Current date in YYYY-MM-DD format
   
-  // Get date from one month ago
-  const startDate = new Date(today)
-  startDate.setMonth(startDate.getMonth() - 1)
+  // Get date from 2025-01-01 (as our data starts from 2025)
+  const startDate = new Date('2025-01-01')
   
   return {
     startDate: startDate.toISOString().slice(0, 10),
@@ -93,56 +92,10 @@ const filters = ref<Filter[]>([
   }
 ])
 
-// Sample data for CusDec records
-const allCusDecs = ref<CusDec[]>([
-  {
-    id: '20231105789',
-    number: 'CBHQ1-I-15789', 
-    declarantCompany: 'Freight Solutions Lanka (Pvt) Ltd',
-    consigneeCompany: 'Ceylon Biscuits Limited',
-    status: 'Processing',
-    officeCode: 'CBHQ1',
-    channel: 'yellow',
-    containerCount: 2,
-    date: '15/04/2025'
-  },
-  {
-    id: '20231104562',
-    number: 'CBHQ1-I-24562',
-    declarantCompany: 'Global Logistics Services',
-    consigneeCompany: 'Maliban Biscuit Manufactories (Pvt) Ltd',
-    status: 'Waiting Confirmation',
-    officeCode: 'KTIM2',
-    channel: 'red',
-    containerCount: 1,
-    date: '08/04/2025'
-  },
-  {
-    id: '20231104123',
-    number: 'CBHQ1-I-32123',
-    declarantCompany: 'Expeditors Lanka (Pvt) Ltd',
-    consigneeCompany: 'Unilever Sri Lanka Ltd',
-    status: 'Waiting Confirmation',
-    officeCode: 'CBHQ1',
-    channel: 'green',
-    containerCount: 3,
-    date: '05/04/2025'
-  },
-  {
-    id: '20231103891',
-    number: 'CBHQ1-I-41891',
-    declarantCompany: 'DHL Global Forwarding Lanka',
-    consigneeCompany: 'Nestle Lanka PLC',
-    status: 'Exited',
-    officeCode: 'KTIM3',
-    channel: 'blue',
-    containerCount: 5,
-    date: '01/04/2025'
-  }
-])
+// Get real data from our anonymized dataset
+const allCusDecs = ref<AnonymizedCusDecRecord[]>(getAllCusDecData())
 
 // Detail state
-const selectedCusDec = ref<CusDec | null>(null)
 const showDetails = ref(false)
 const showFilters = ref(false)
 // Only show sidebar by default on desktop, hide on mobile initially
@@ -162,61 +115,61 @@ onMounted(() => {
       showSidebar.value = false
     }
   })
+  
+  // Debug data loading
+  console.log("Component mounted with data:", allCusDecs.value.length, "records");
+  console.log("First few records:", allCusDecs.value.slice(0, 3));
+  console.log("Sample statuses:", [...new Set(allCusDecs.value.map(r => r.status))]);
 })
 
-// Define cusdec details
-const cusDecDetails = ref({
-  consignee: 'ABC Group',
-  declarant: 'CDS Group',
-  invoiceValue: '1000.00',
-  blNumber: '56454',
-  numberOfItems: '3'
-})
+// Define cusdec stats
+const cusDecStats = calculateCusDecStats()
+
+// Map status from data to processing stage
+const mapStatusToProcessingStage = (status: string): string => {
+  status = status.toLowerCase();
+  if (status === 'processing' || status === 'on hold') {
+    return 'processing';
+  } else if (status === 'rejected') {
+    return 'detained';
+  } else if (status === 'released' || status === 'exempted') {
+    return 'exited';
+  } else {
+    return status; // Return original for 'waiting confirmation' or unknown statuses
+  }
+}
 
 // Filter CusDecs based on filters, active status, and date range
 const filteredCusDecs = computed(() => {
-  let filtered = allCusDecs.value.filter(cusdec => {
-    const numberFilter = filters.value.find(f => f.id === 'cusdecNumber')
-    const declarantFilter = filters.value.find(f => f.id === 'declarantTIN')
-    const consigneeFilter = filters.value.find(f => f.id === 'consigneeTIN')
-    
-    const matchesNumber = !numberFilter?.value || 
-      cusdec.number.toLowerCase().includes(numberFilter.value.toLowerCase())
-    
-    const matchesDeclarant = !declarantFilter?.value || 
-      cusdec.declarantCompany.toLowerCase().includes(declarantFilter.value.toLowerCase())
-    
-    const matchesConsignee = !consigneeFilter?.value || 
-      cusdec.consigneeCompany.toLowerCase().includes(consigneeFilter.value.toLowerCase())
-    
-    const matchesStatus = activeStatusFilter.value === 'all' || 
-      cusdec.status.toLowerCase().replace(' ', '_') === activeStatusFilter.value
-    
-    // Check date range if the cusdec has a date
-    let matchesDateRange = true
-    if (cusdec.date) {
-      // Convert DD/MM/YYYY to Date object
-      const parts = cusdec.date.split('/')
-      const cusDecDate = new Date(
-        parseInt(parts[2]), // Year
-        parseInt(parts[1]) - 1, // Month (0-indexed)
-        parseInt(parts[0]) // Day
-      )
-      
-      const startDate = new Date(dateRange.value.startDate)
-      const endDate = new Date(dateRange.value.endDate)
-      
-      matchesDateRange = cusDecDate >= startDate && cusDecDate <= endDate
-    }
-
-    return matchesNumber && matchesDeclarant && matchesConsignee && matchesStatus && matchesDateRange
-  })
-
-  // Sort results to prioritize "Waiting Confirmation" items if in "All" tab
+  // Debug logs
+  console.log("Date range:", dateRange.value);
+  console.log("Active status filter:", activeStatusFilter.value);
+  console.log("Filters:", filters.value.map(f => `${f.id}: ${f.value}`).join(', '));
+  
+  // First get data filtered by basic criteria
+  let filtered = filterCusDecs({
+    cusdecNumber: filters.value.find(f => f.id === 'cusdecNumber')?.value,
+    declarantTIN: filters.value.find(f => f.id === 'declarantTIN')?.value,
+    consigneeTIN: filters.value.find(f => f.id === 'consigneeTIN')?.value,
+    // Don't filter by status here - we'll do that below
+    startDate: dateRange.value.startDate,
+    endDate: dateRange.value.endDate
+  });
+  
+  // Then apply processing stage filter if needed
+  if (activeStatusFilter.value !== 'all') {
+    filtered = filtered.filter(record => {
+      return mapStatusToProcessingStage(record.status).toLowerCase() === activeStatusFilter.value.toLowerCase();
+    });
+  }
+  
+  console.log(`Filtered results: ${filtered.length} records`);
+  
+  // Sort results to prioritize "Processing" items if in "All" tab
   if (activeStatusFilter.value === 'all') {
     filtered.sort((a, b) => {
-      if (a.status === 'Waiting Confirmation' && b.status !== 'Waiting Confirmation') return -1;
-      if (a.status !== 'Waiting Confirmation' && b.status === 'Waiting Confirmation') return 1;
+      if (a.status === 'Processing' && b.status !== 'Processing') return -1;
+      if (a.status !== 'Processing' && b.status === 'Processing') return 1;
       return 0;
     });
   }
@@ -226,17 +179,44 @@ const filteredCusDecs = computed(() => {
 
 // Pagination state
 const currentPage = ref(1)
-const itemsPerPage = 5
+const itemsPerPage = 10
 const totalPages = computed(() => Math.ceil(filteredCusDecs.value.length / itemsPerPage))
+const displayedItemsCount = ref(itemsPerPage)
 
 // Get paginated CusDecs
 const paginatedCusDecs = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredCusDecs.value.slice(start, end)
+  console.log("isMobile:", isMobile.value);
+  
+  // For desktop view - use pagination
+  if (!isMobile.value) {
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredCusDecs.value.slice(start, end)
+  }
+  // For mobile view - use "load more" approach
+  return filteredCusDecs.value.slice(0, displayedItemsCount.value)
 })
 
-// Handle pagination change
+// Loading state for Load More
+const isLoadingMore = ref(false)
+
+// Load more items for mobile view
+const loadMoreItems = () => {
+  isLoadingMore.value = true
+  
+  // Add small delay to simulate loading
+  setTimeout(() => {
+    displayedItemsCount.value += itemsPerPage
+    isLoadingMore.value = false
+  }, 500)
+}
+
+// Check if there are more items to load
+const hasMoreItems = computed(() => {
+  return displayedItemsCount.value < filteredCusDecs.value.length
+})
+
+// Handle pagination change (for desktop)
 const handlePageChange = (page: number) => {
   currentPage.value = page
 }
@@ -244,6 +224,7 @@ const handlePageChange = (page: number) => {
 // Handle search
 const handleSearch = () => {
   currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
 }
 
 // Handle filter update
@@ -258,11 +239,13 @@ const updateDateRange = (start: string, end: string) => {
     endDate: end
   }
   currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
 }
 
 // Handle view details
-const handleViewDetails = (cusdec: any) => {
-  router.push(`/CusDecDetail/${cusdec.id}`)
+const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
+  cusDecDetails.value = cusdec;
+  showDetails.value = true;
 }
 
 // Handle close details
@@ -285,9 +268,51 @@ const handleReset = () => {
   filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
   dateRange.value = getLastMonthDateRange()
   currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
 }
 
+// Define details for display
+const cusDecDetails = ref<AnonymizedCusDecRecord | null>(null);
+
 const router = useRouter()
+
+// Add table headers for desktop view
+const tableHeaders = [
+  { id: 'cusdec', label: 'CusDec Number' },
+  { id: 'consignee', label: 'Consignee' },
+  { id: 'declarant', label: 'Declarant' },
+  { id: 'status', label: 'Status' },
+  { id: 'date', label: 'Date' }
+];
+
+// Get status badge class for desktop view
+const getStatusBadgeClass = (status: string) => {
+  const statusLower = status.toLowerCase();
+  switch (statusLower) {
+    case 'released':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
+    case 'processing':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800';
+    case 'on hold':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800';
+    case 'rejected':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800';
+    case 'exempted':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800';
+    default:
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800';
+  }
+};
+
+// Format date for display
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
 </script>
 
 <template>
@@ -479,20 +504,88 @@ const router = useRouter()
                 </div>
               </div>
               
-              <!-- CusDec cards list -->
-              <CusDecCard
-                v-for="cusdec in paginatedCusDecs"
-                :key="cusdec.id"
-                :cusdec="cusdec"
-              />
-              
-              <!-- Pagination -->
-              <div class="flex justify-center mt-6">
-                <Pagination
-                  :total-pages="totalPages"
-                  :current-page="currentPage"
-                  @change="handlePageChange"
+              <!-- Card-based layout for all screen sizes -->
+              <div class="space-y-4">
+                <CusDecCard
+                  v-for="cusdec in paginatedCusDecs"
+                  :key="cusdec.id"
+                  :cusdec="cusdec"
+                  @view-details="handleViewDetails"
+                  class="mb-4" 
                 />
+                
+                <!-- Load More button (mobile only) -->
+                <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-6 mb-20">
+                  <button 
+                    @click="loadMoreItems"
+                    :disabled="isLoadingMore"
+                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                  >
+                    <template v-if="isLoadingMore">
+                      <svg class="w-5 h-5 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </template>
+                    <template v-else>
+                      Load More
+                    </template>
+                  </button>
+                </div>
+                
+                <!-- Pagination (desktop only) -->
+                <div v-if="!isMobile" class="flex justify-center mt-6">
+                  <nav class="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button 
+                      @click="handlePageChange(currentPage - 1)" 
+                      :disabled="currentPage === 1"
+                      class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span class="sr-only">Previous</span>
+                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    <button 
+                      v-for="page in totalPages" 
+                      :key="page" 
+                      @click="handlePageChange(page)" 
+                      :class="[
+                        'inline-flex items-center px-4 py-2 text-sm font-medium border',
+                        currentPage === page 
+                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      ]"
+                    >
+                      {{ page }}
+                    </button>
+                    
+                    <button 
+                      @click="handlePageChange(currentPage + 1)" 
+                      :disabled="currentPage === totalPages"
+                      class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span class="sr-only">Next</span>
+                      <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+                
+                <div v-if="!isMobile" class="flex items-center justify-center mt-2">
+                  <p class="text-sm text-gray-500">
+                    Showing 
+                    <span class="font-medium">{{ ((currentPage - 1) * itemsPerPage) + 1 }}</span> 
+                    to 
+                    <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredCusDecs.length) }}</span> 
+                    of 
+                    <span class="font-medium">{{ filteredCusDecs.length }}</span> 
+                    results
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -505,13 +598,13 @@ const router = useRouter()
     
     <!-- Detail modal -->
     <div 
-      v-if="showDetails && selectedCusDec" 
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      v-if="showDetails" 
+      class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50"
     >
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-auto">
-        <div class="sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b">
-          <h2 class="text-lg font-semibold">CusDec Details</h2>
-          <button @click="handleCloseDetails" class="text-gray-500 hover:text-gray-700">
+      <div class="w-full max-w-2xl p-0 mx-4 overflow-hidden bg-white rounded-lg shadow-lg">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-900">CusDec Details</h3>
+          <button @click="handleCloseDetails" class="p-1 text-gray-500 hover:text-gray-700 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -520,34 +613,38 @@ const router = useRouter()
         </div>
         
         <div class="p-4 space-y-6">
-          <div class="grid grid-cols-2 gap-4">
+          <div v-if="cusDecDetails" class="grid grid-cols-2 gap-4">
             <div>
               <p class="text-sm text-gray-500">CusDec Number</p>
-              <p class="font-medium">{{ selectedCusDec.number }}</p>
+              <p class="font-medium">{{ cusDecDetails.cusdecNumber }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-500">Status</p>
-              <p class="font-medium">{{ selectedCusDec.status }}</p>
+              <p class="font-medium">{{ cusDecDetails.status }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-500">Consignee</p>
-              <p class="font-medium">{{ cusDecDetails.consignee }}</p>
+              <p class="font-medium">{{ cusDecDetails.consigneeName }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-500">Declarant</p>
-              <p class="font-medium">{{ cusDecDetails.declarant }}</p>
+              <p class="font-medium">{{ cusDecDetails.declarantName }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-500">Invoice Value</p>
               <p class="font-medium">{{ cusDecDetails.invoiceValue }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">B/L Number</p>
-              <p class="font-medium">{{ cusDecDetails.blNumber }}</p>
+              <p class="text-sm text-gray-500">Origin Country</p>
+              <p class="font-medium">{{ cusDecDetails.originCountry }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">No. of Items</p>
-              <p class="font-medium">{{ cusDecDetails.numberOfItems }}</p>
+              <p class="text-sm text-gray-500">Container Count</p>
+              <p class="font-medium">{{ cusDecDetails.containerCount }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Incoterm</p>
+              <p class="font-medium">{{ cusDecDetails.incoterm }}</p>
             </div>
           </div>
         </div>

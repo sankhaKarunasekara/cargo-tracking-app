@@ -2,9 +2,13 @@
 import { ref, computed, onMounted } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
-import Pagination from '../components/ui/pagination/pagination.vue'
+import Pagination from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
+import { useWindowSize } from '../lib/hooks/useWindowSize'
+
+// Get window size and mobile status
+const { isMobile } = useWindowSize()
 
 // Define filter type
 type Filter = {
@@ -123,6 +127,7 @@ const allContainers = ref([
 const currentPage = ref(1)
 const itemsPerPage = 5
 const totalPages = computed(() => Math.ceil(filteredContainers.value.length / itemsPerPage))
+const displayedItemsCount = ref(itemsPerPage)
 
 // Modal state
 const selectedContainer = ref(null)
@@ -154,12 +159,36 @@ const filteredContainers = computed(() => {
 
 // Get paginated containers
 const paginatedContainers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredContainers.value.slice(start, end)
+  // For desktop view - use pagination
+  if (!isMobile.value) {
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredContainers.value.slice(start, end)
+  }
+  // For mobile view - use "load more" approach
+  return filteredContainers.value.slice(0, displayedItemsCount.value)
 })
 
-// Handle pagination change
+// Loading state for Load More
+const isLoadingMore = ref(false)
+
+// Load more items for mobile view
+const loadMoreItems = () => {
+  isLoadingMore.value = true
+  
+  // Add small delay to simulate loading
+  setTimeout(() => {
+    displayedItemsCount.value += itemsPerPage
+    isLoadingMore.value = false
+  }, 500)
+}
+
+// Check if there are more items to load
+const hasMoreItems = computed(() => {
+  return displayedItemsCount.value < filteredContainers.value.length
+})
+
+// Handle pagination change (for desktop)
 const handlePageChange = (page: number) => {
   currentPage.value = page
 }
@@ -167,6 +196,7 @@ const handlePageChange = (page: number) => {
 // Handle search
 const handleSearch = () => {
   currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
   showFilters.value = false
 }
 
@@ -190,6 +220,7 @@ const toggleFilters = () => {
 const handleReset = () => {
   filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
   currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
 }
 </script>
 
@@ -296,13 +327,33 @@ const handleReset = () => {
             @viewDetails="handleViewDetails"
           />
           
-          <!-- Pagination -->
+          <!-- Pagination for desktop, Load More for mobile -->
           <div class="flex justify-center mt-6">
-            <Pagination
-              :total-pages="totalPages"
-              :current-page="currentPage"
-              @change="handlePageChange"
-            />
+            <!-- Pagination (desktop only) -->
+            <div class="hidden md:block">
+              <Pagination
+                :total-pages="totalPages"
+                :current-page="currentPage"
+                @change="handlePageChange"
+              />
+            </div>
+            
+            <!-- Load More button (mobile only) -->
+            <button
+              v-if="hasMoreItems"
+              @click="loadMoreItems"
+              :disabled="isLoadingMore"
+              class="w-full px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-md shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
+            >
+              <span v-if="isLoadingMore" class="flex items-center justify-center">
+                <svg class="w-4 h-4 mr-2 -ml-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </span>
+              <span v-else>Load More</span>
+            </button>
           </div>
         </div>
       </div>

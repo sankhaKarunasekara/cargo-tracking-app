@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ButtonComponent from '../components/ui/button/index'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card/card.vue'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
 
 const router = useRouter()

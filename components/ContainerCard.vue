@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card/card.vue'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card'
 import ButtonComponent from './ui/button/index'
 
 // Define the props
@@ -120,13 +120,13 @@ const features = {
       
       <!-- Progress bar -->
       <div class="mb-5">
-        <div class="flex justify-between text-xs text-gray-500 mb-1">
+        <div class="flex justify-between mb-1 text-xs text-gray-500">
           <span>Processing</span>
           <span>{{ container.status === 'ExitedYard' ? 'Completed' : 'In Progress' }}</span>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="w-full h-2 bg-gray-200 rounded-full">
           <div 
-            class="h-2 rounded-full bg-blue-600" 
+            class="h-2 bg-blue-600 rounded-full" 
             :style="{ width: `${getProgressPercentage()}%` }"
           ></div>
         </div>
@@ -167,7 +167,7 @@ const features = {
 
     <!-- Updated Action buttons in CardFooter to match table-like layout -->
     <CardFooter class="px-5 pt-0 pb-5">
-      <div class="flex flex-col sm:flex-row items-center justify-end gap-2 w-full sm:ms-auto">
+      <div class="flex flex-col items-center justify-end w-full gap-2 sm:flex-row sm:ms-auto">
         <ButtonComponent 
           variant="outline"
           size="sm" 

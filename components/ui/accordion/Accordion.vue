@@ -2,6 +2,7 @@
 import { ref, provide, watch } from 'vue'
 import { cn } from '../../../lib/utils'
 import { AccordionContextValue } from './types'
+import { PropType } from 'vue'
 
 const props = defineProps({
   type: {
@@ -14,11 +15,11 @@ const props = defineProps({
     default: false
   },
   value: {
-    type: [String, Array],
+    type: [String, Array] as PropType<string | string[] | undefined>,
     default: undefined
   },
   defaultValue: {
-    type: [String, Array],
+    type: [String, Array] as PropType<string | string[] | undefined>,
     default: undefined
   },
   class: {
@@ -29,7 +30,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value'])
 
-const internalValue = ref<string | string[] | undefined>(props.value !== undefined ? props.value : props.defaultValue)
+const internalValue = ref<string | string[] | undefined>(
+  props.value !== undefined ? (props.value as string | string[] | undefined) : props.defaultValue
+)
 
 // Watch for value changes from parent - use any to avoid type issues
 watch(() => props.value, (newValue: any) => {

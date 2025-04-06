@@ -1,38 +1,28 @@
 <script setup lang="ts">
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card/card.vue'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card'
 import ButtonComponent from './ui/button/index'
 import StatusTimelineButton from './StatusTimelineButton.vue'
 import { ref, computed } from 'vue'
+import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
+import { useRouter } from 'vue-router'
 
 // Define the props
-interface CusDec {
-  id: string;
-  number: string;
-  declarantCompany: string;
-  consigneeCompany: string;
-  status: string;
-  officeCode?: string;
-  channel?: 'red' | 'yellow' | 'green' | 'blue';
-  containerCount?: number;
-  date?: string;
-}
-
 interface Props {
-  cusdec: CusDec;
+  cusdec: AnonymizedCusDecRecord;
 }
 
 const props = defineProps<Props>();
+const router = useRouter();
 
 // Define the emits
 const emit = defineEmits<{
-  'viewDetails': [cusdec: CusDec];
+  'view-details': [cusdec: AnonymizedCusDecRecord];
 }>();
 
 // Method to handle view details click
 const handleViewDetails = () => {
-  emit('viewDetails', props.cusdec);
-  // Use simple navigation to avoid redirection issues
-  window.location.href = `/CusDecDetail/${props.cusdec.id}`;
+  emit('view-details', props.cusdec);
+  router.push(`/cusdec/${props.cusdec.id}`);
 };
 
 // Get default office code if not provided
@@ -42,12 +32,19 @@ const officeCode = computed(() => {
 
 // Get default channel if not provided
 const channel = computed(() => {
-  return props.cusdec.channel || 'green';
+  return props.cusdec.channel?.toLowerCase() || 'green';
 });
 
-// Get default date if not provided
-const date = computed(() => {
-  return props.cusdec.date || '05/04/2024';
+// Format registration date for display
+const formattedDate = computed(() => {
+  if (!props.cusdec.regDate) return '05/04/2024';
+  
+  const date = new Date(props.cusdec.regDate);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).replace(/\//g, '/');
 });
 
 // Get container count with default
@@ -93,28 +90,48 @@ const getChannelColor = computed(() => {
 
 // Get status color based on status value
 const getStatusColor = () => {
-  switch (props.cusdec.status.toLowerCase()) {
-    case 'waiting confirmation':
-      return 'status-bg-submitted'
+  const status = props.cusdec.status.toLowerCase();
+  
+  switch (status) {
     case 'processing':
-      return 'status-bg-review'
-    case 'exited':
-      return 'status-bg-paid'
-    case 'error':
-    case 'cancelled':
+      return 'status-bg-review';
+    case 'released':
+    case 'exempted':
+      return 'status-bg-paid';
+    case 'waiting confirmation':
+      return 'status-bg-pending';
+    case 'on hold':
+      return 'status-bg-review';
+    case 'detained':
     case 'rejected':
-      return 'status-bg-error'
+      return 'status-bg-error';
     default:
-      return 'bg-gray-100 text-gray-800'
+      return 'bg-gray-100 text-gray-800';
   }
 }
 
-// Mock features for display (can be replaced with actual data)
+// Map status to processing stage
+const processingStage = computed(() => {
+  const status = props.cusdec.status.toLowerCase();
+  if (status === 'processing' || status === 'on hold') {
+    return 'Processing';
+  } else if (status === 'rejected') {
+    return 'Detained';
+  } else if (status === 'released' || status === 'exempted') {
+    return 'Exited';
+  } else if (status === 'waiting confirmation') {
+    return 'Waiting Confirmation';
+  } else {
+    return props.cusdec.status;
+  }
+});
+
+// Features based on status
 const features = {
   submission: true,
-  assessment: props.cusdec.status !== 'Waiting Confirmation',
-  payment: ['Processing', 'Exited'].includes(props.cusdec.status),
-  release: props.cusdec.status === 'Exited'
+  assessment: !['Processing', 'On Hold', 'Waiting Confirmation'].includes(props.cusdec.status),
+  payment: ['Released', 'Exempted'].includes(props.cusdec.status),
+  release: props.cusdec.status === 'Released'
 }
 </script>
 
@@ -137,18 +154,20 @@ const features = {
               </svg>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-gray-900">{{ cusdec.number }}</h3>
+              <h3 class="text-base font-semibold text-gray-900">{{ cusdec.cusdecNumber }}</h3>
               <div class="flex items-center mt-1 text-xs text-gray-500">
                 <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ officeCode }}</span>
                 <span class="mx-1.5">•</span>
-                <span>{{ date }}</span>
+                <span>{{ formattedDate }}</span>
               </div>
             </div>
           </div>
           
           <!-- Right: Status badge -->
-          <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
-            {{ cusdec.status }}
+          <div class="flex flex-col items-end">
+            <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
+              {{ cusdec.status }}
+            </div>
           </div>
         </div>
       </div>
@@ -191,11 +210,11 @@ const features = {
         <div class="space-y-2 text-sm">
           <div class="flex">
             <span class="w-20 text-gray-500">Consignee:</span>
-            <span class="font-medium text-gray-700">{{ cusdec.consigneeCompany }}</span>
+            <span class="font-medium text-gray-700">{{ cusdec.consigneeName }}</span>
           </div>
           <div class="flex">
             <span class="w-20 text-gray-500">Declarant:</span>
-            <span class="font-medium text-gray-700">{{ cusdec.declarantCompany }}</span>
+            <span class="font-medium text-gray-700">{{ cusdec.declarantName }}</span>
           </div>
         </div>
       </div>
@@ -276,17 +295,17 @@ const features = {
               </svg>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-gray-900">{{ cusdec.number }}</h3>
+              <h3 class="text-base font-semibold text-gray-900">{{ cusdec.cusdecNumber }}</h3>
               <div class="flex items-center mt-1 text-xs text-gray-500">
                 <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ officeCode }}</span>
                 <span class="mx-1.5">•</span>
-                <span>{{ date }}</span>
+                <span>{{ formattedDate }}</span>
               </div>
             </div>
           </div>
           
           <!-- Status badge -->
-          <div :class="['px-3 py-1 text-xs font-medium rounded-full ml-auto', getStatusColor()]">
+          <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
             {{ cusdec.status }}
           </div>
         </div>
@@ -325,11 +344,11 @@ const features = {
           <div class="space-y-2 text-sm">
             <div class="flex">
               <span class="w-20 text-gray-500">Consignee:</span>
-              <span class="font-medium text-gray-700">{{ cusdec.consigneeCompany }}</span>
+              <span class="font-medium text-gray-700">{{ cusdec.consigneeName }}</span>
             </div>
             <div class="flex">
               <span class="w-20 text-gray-500">Declarant:</span>
-              <span class="font-medium text-gray-700">{{ cusdec.declarantCompany }}</span>
+              <span class="font-medium text-gray-700">{{ cusdec.declarantName }}</span>
             </div>
           </div>
         </div>
@@ -415,5 +434,10 @@ const features = {
 .status-bg-error {
   background-color: rgb(254, 226, 226);
   color: rgb(220, 38, 38);
+}
+
+.status-bg-pending {
+  background-color: rgb(238, 242, 255);
+  color: rgb(79, 70, 229);
 }
 </style> 
