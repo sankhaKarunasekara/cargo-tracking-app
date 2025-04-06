@@ -1,102 +1,133 @@
-import { defineComponent, h, provide, inject, computed, ref, watch, Teleport, Ref, Component } from 'vue'
+import { defineComponent, h, ref, provide, inject, computed, watch, onMounted, Ref } from 'vue'
 import { cn } from '../../../lib/utils'
 
 // Sidebar context
-interface SidebarContextValue {
-  isOpen: Ref<boolean>;
-  toggleSidebar: () => void;
-  collapsibleState: Ref<CollapsibleState>;
-}
-
 const SidebarContext = Symbol('SidebarContext')
 
-// Types
-export type CollapsibleState = 'visible' | 'icon' | 'hidden'
+export interface SidebarContextValue {
+  open: Ref<boolean>
+  toggleSidebar: () => void
+  collapsed: Ref<boolean>
+  collapsible: Ref<string | boolean>
+}
 
-export const useSidebar = (): SidebarContextValue => {
-  const context = inject<SidebarContextValue | undefined>(SidebarContext)
+// Hook to use the sidebar context
+export function useSidebar(): SidebarContextValue {
+  const context = inject<SidebarContextValue>(SidebarContext)
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider')
   }
   return context
 }
 
-// SidebarProvider
+// SidebarProvider component
 export const SidebarProvider = defineComponent({
   name: 'SidebarProvider',
   props: {
     open: {
       type: Boolean,
+      default: undefined
+    },
+    defaultOpen: {
+      type: Boolean,
       default: true
+    },
+    collapsible: {
+      type: [String, Boolean],
+      default: false
+    },
+    defaultCollapsed: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['update:open'],
   setup(props, { slots, emit }) {
-    const isOpen = ref(props.open)
+    const controlled = computed(() => props.open !== undefined)
+    const openState = ref(controlled.value ? !!props.open : props.defaultOpen)
+    const collapsedState = ref(props.defaultCollapsed)
+    const collapsibleState = ref(props.collapsible)
 
-    watch(() => props.open, (newValue) => {
-      isOpen.value = newValue
+    watch(() => props.open, (value) => {
+      if (controlled.value && value !== undefined) {
+        openState.value = value
+      }
     })
 
     const toggleSidebar = () => {
-      isOpen.value = !isOpen.value
-      emit('update:open', isOpen.value)
+      const newValue = !openState.value
+      if (controlled.value) {
+        emit('update:open', newValue)
+      } else {
+        openState.value = newValue
+      }
     }
 
-    const collapsibleState = computed<CollapsibleState>(() => {
-      return isOpen.value ? 'visible' : 'icon'
-    })
-
-    // Provide sidebar context
-    provide<SidebarContextValue>(SidebarContext, {
-      isOpen,
+    // Provide the sidebar context
+    provide(SidebarContext, {
+      open: openState,
       toggleSidebar,
-      collapsibleState
+      collapsed: collapsedState,
+      collapsible: collapsibleState
     })
 
-    return () => h('div', { class: 'flex h-screen' }, slots.default?.())
+    return () => slots.default?.()
   }
 })
 
-// Sidebar
+// Sidebar component
 export const Sidebar = defineComponent({
   name: 'Sidebar',
   props: {
-    collapsible: {
-      type: String,
-      default: 'visible',
-      validator: (value: string) => ['visible', 'icon', 'hidden'].includes(value)
-    },
-    class: {
+    className: {
       type: String,
       default: ''
+    },
+    collapsible: {
+      type: [String, Boolean],
+      default: false
     }
   },
   setup(props, { slots }) {
-    const { isOpen, collapsibleState } = useSidebar()
-
-    const sidebarClasses = computed(() => {
-      return cn(
-        'group/sidebar bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))]',
-        'border-r border-[hsl(var(--sidebar-border))] h-screen',
-        'flex flex-col overflow-hidden transition-all duration-300',
-        isOpen.value ? 'w-64' : 'w-[4.5rem]',
-        props.class
-      )
-    })
+    // Try to use external sidebar context, but don't fail if not available
+    let open = ref(true);
+    let collapsible = ref(props.collapsible);
+    let contextAvailable = true;
+    
+    try {
+      const context = useSidebar();
+      open = context.open;
+      collapsible = context.collapsible;
+      
+      // Set collapsible state if it's provided at this level
+      if (props.collapsible) {
+        collapsible.value = props.collapsible;
+      }
+    } catch (error) {
+      // Create local state if no context is available
+      contextAvailable = false;
+      console.warn('No SidebarProvider found, using local state');
+    }
 
     return () => h('aside', {
-      class: sidebarClasses.value,
-      'data-collapsible': collapsibleState.value
+      'data-open': open.value,
+      'data-collapsible': collapsible.value,
+      class: cn(
+        'group flex h-full flex-col overflow-hidden bg-sidebar-background text-sidebar-foreground',
+        'border-r border-sidebar-border data-[open=false]:w-0',
+        collapsible.value === 'icon' ? 'data-[collapsible=icon]:w-16 data-[collapsible=icon]:data-[open=true]:w-64 transition-[width] duration-300' : '',
+        collapsible.value === 'collapsed' ? 'data-[collapsible=collapsed]:w-16 data-[collapsible=collapsed]:data-[open=true]:w-64 transition-[width] duration-300' : '',
+        props.className
+      )
     }, slots.default?.())
   }
 })
 
-// SidebarHeader
+// SidebarHeader component
 export const SidebarHeader = defineComponent({
   name: 'SidebarHeader',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
@@ -104,37 +135,18 @@ export const SidebarHeader = defineComponent({
   setup(props, { slots }) {
     return () => h('div', {
       class: cn(
-        'h-14 flex items-center gap-2 px-4 border-b border-[hsl(var(--sidebar-border))]',
-        props.class
+        'flex h-14 items-center border-b border-sidebar-border px-4',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarFooter
-export const SidebarFooter = defineComponent({
-  name: 'SidebarFooter',
-  props: {
-    class: {
-      type: String,
-      default: ''
-    }
-  },
-  setup(props, { slots }) {
-    return () => h('div', {
-      class: cn(
-        'mt-auto p-4 border-t border-[hsl(var(--sidebar-border))]',
-        props.class
-      )
-    }, slots.default?.())
-  }
-})
-
-// SidebarContent
+// SidebarContent component
 export const SidebarContent = defineComponent({
   name: 'SidebarContent',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
@@ -142,18 +154,37 @@ export const SidebarContent = defineComponent({
   setup(props, { slots }) {
     return () => h('div', {
       class: cn(
-        'flex-1 overflow-auto py-2',
-        props.class
+        'flex-1 overflow-auto',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarGroup
+// SidebarFooter component
+export const SidebarFooter = defineComponent({
+  name: 'SidebarFooter',
+  props: {
+    className: {
+      type: String,
+      default: ''
+    }
+  },
+  setup(props, { slots }) {
+    return () => h('div', {
+      class: cn(
+        'mt-auto border-t border-sidebar-border p-4',
+        props.className
+      )
+    }, slots.default?.())
+  }
+})
+
+// SidebarGroup component
 export const SidebarGroup = defineComponent({
   name: 'SidebarGroup',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
@@ -161,40 +192,48 @@ export const SidebarGroup = defineComponent({
   setup(props, { slots }) {
     return () => h('div', {
       class: cn(
-        'px-2 py-2',
-        props.class
+        'px-2 py-4',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarGroupLabel
+// SidebarGroupLabel component
 export const SidebarGroupLabel = defineComponent({
   name: 'SidebarGroupLabel',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
   setup(props, { slots }) {
-    const { isOpen } = useSidebar()
-
+    // Try to use context, but provide fallback
+    let collapsible = ref<string | boolean>(false);
+    
+    try {
+      const context = useSidebar();
+      collapsible = context.collapsible;
+    } catch (error) {
+      // Use default if no context available
+    }
+    
     return () => h('div', {
       class: cn(
-        'text-xs uppercase font-semibold text-[hsl(var(--sidebar-foreground))] opacity-60 px-2 mb-2',
-        isOpen.value ? 'block' : 'hidden',
-        props.class
+        'mb-2 px-2 text-xs font-semibold tracking-tight',
+        'group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[0.625rem]',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarGroupContent
+// SidebarGroupContent component
 export const SidebarGroupContent = defineComponent({
   name: 'SidebarGroupContent',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
@@ -203,17 +242,17 @@ export const SidebarGroupContent = defineComponent({
     return () => h('div', {
       class: cn(
         'space-y-1',
-        props.class
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarMenu
+// SidebarMenu component
 export const SidebarMenu = defineComponent({
   name: 'SidebarMenu',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
@@ -221,33 +260,34 @@ export const SidebarMenu = defineComponent({
   setup(props, { slots }) {
     return () => h('nav', {
       class: cn(
-        'space-y-1',
-        props.class
+        'grid gap-1',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarMenuItem
+// SidebarMenuItem component
 export const SidebarMenuItem = defineComponent({
   name: 'SidebarMenuItem',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
   setup(props, { slots }) {
     return () => h('div', {
+      role: 'none',
       class: cn(
-        'group/menu-item relative flex items-center',
-        props.class
+        'group flex items-center justify-between rounded-md',
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarMenuButton
+// SidebarMenuButton component
 export const SidebarMenuButton = defineComponent({
   name: 'SidebarMenuButton',
   props: {
@@ -259,162 +299,180 @@ export const SidebarMenuButton = defineComponent({
       type: Boolean,
       default: false
     },
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
   setup(props, { slots }) {
-    const { isOpen } = useSidebar()
-
-    const buttonClasses = computed(() => {
-      return cn(
-        'group/menu-button peer/menu-button relative flex w-full cursor-pointer items-center rounded-md px-2 py-2',
-        'hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]',
-        props.active && 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]',
-        props.class
-      )
-    })
-
-    if (props.asChild) {
-      return () => {
-        const child = slots.default?.()[0]
-        if (!child) return null
-
-        return h(child.type, {
-          ...child.props,
-          class: buttonClasses.value,
-          'data-active': props.active
-        }, {
-          default: () => child.children?.default?.()
-        })
-      }
+    // Try to use context, but provide fallback
+    let collapsible = ref<string | boolean>(false);
+    
+    try {
+      const context = useSidebar();
+      collapsible = context.collapsible;
+    } catch (error) {
+      // Use default if no context available
     }
 
-    return () => h('button', {
-      class: buttonClasses.value,
-      'data-active': props.active
-    }, [
-      slots.default?.()
-    ])
+    const Element = props.asChild ? 'slot' : 'button'
+    
+    if (Element === 'slot' && !slots.default) {
+      console.warn('SidebarMenuButton: asChild prop was passed without a child component.')
+      return () => null
+    }
+
+    return () => {
+      const slotContent = slots.default?.()
+      
+      if (props.asChild && slotContent) {
+        // Get the first child from the slot
+        const child = Array.isArray(slotContent) ? slotContent[0] : slotContent
+        
+        // Clone the child element with added props
+        return h(child, {
+          role: 'menuitem',
+          'data-active': props.active,
+          class: cn(
+            'peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium',
+            'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            'data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground',
+            'group-data-[collapsible=icon]:justify-center',
+            child.props?.className,
+            props.className
+          )
+        })
+      }
+      
+      return h('button', {
+        role: 'menuitem',
+        'data-active': props.active,
+        class: cn(
+          'peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium',
+          'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+          'data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground',
+          'group-data-[collapsible=icon]:justify-center',
+          props.className
+        )
+      }, slots.default?.())
+    }
   }
 })
 
-// SidebarMenuAction
+// SidebarMenuAction component
 export const SidebarMenuAction = defineComponent({
   name: 'SidebarMenuAction',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
   setup(props, { slots }) {
-    const { isOpen } = useSidebar()
-
     return () => h('button', {
       class: cn(
-        'absolute right-2 flex h-6 w-6 items-center justify-center rounded-md opacity-0',
-        'text-[hsl(var(--sidebar-foreground))]',
-        'hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]',
+        'flex h-7 w-7 items-center justify-center rounded opacity-0 transition-opacity hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+        'group-hover:opacity-100',
         'focus:opacity-100',
-        'group-hover/menu-item:opacity-100',
-        isOpen.value ? 'visible' : 'hidden',
-        props.class
+        props.className
       )
     }, slots.default?.())
   }
 })
 
-// SidebarSeparator
+// SidebarSeparator component
 export const SidebarSeparator = defineComponent({
   name: 'SidebarSeparator',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
   setup(props) {
-    return () => h('div', {
+    return () => h('hr', {
       class: cn(
-        'my-2 h-px bg-[hsl(var(--sidebar-border))]',
-        props.class
+        'my-2 border-sidebar-border',
+        props.className
       )
     })
   }
 })
 
-// SidebarTrigger
+// SidebarTrigger component
 export const SidebarTrigger = defineComponent({
   name: 'SidebarTrigger',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
-  setup(props) {
-    const { toggleSidebar } = useSidebar()
+  setup(props, { slots }) {
+    // Default toggle function that does nothing
+    let toggleSidebar = () => {
+      console.warn('No SidebarProvider found for SidebarTrigger')
+    }
+    
+    try {
+      const context = useSidebar()
+      toggleSidebar = context.toggleSidebar
+    } catch (error) {
+      // Use default if no context available
+    }
 
     return () => h('button', {
+      onClick: toggleSidebar,
       class: cn(
-        'flex h-10 w-10 items-center justify-center rounded-md',
-        'text-[hsl(var(--sidebar-foreground))]',
-        'hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]',
-        props.class
-      ),
-      onClick: toggleSidebar
+        'inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-accent',
+        props.className
+      )
+    }, slots.default || (() => h('svg', {
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: '20',
+      height: '20',
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: 'currentColor',
+      strokeWidth: '2',
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round'
     }, [
-      h('svg', {
-        xmlns: 'http://www.w3.org/2000/svg',
-        width: '20',
-        height: '20',
-        viewBox: '0 0 24 24',
-        fill: 'none',
-        stroke: 'currentColor',
-        'stroke-width': '2',
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round'
-      }, [
-        h('path', { d: 'M3 12h18M3 6h18M3 18h18' })
-      ])
-    ])
+      h('path', { d: 'M3 12h18' }),
+      h('path', { d: 'M3 6h18' }),
+      h('path', { d: 'M3 18h18' })
+    ])))
   }
 })
 
-// SidebarRail
+// SidebarRail component
 export const SidebarRail = defineComponent({
   name: 'SidebarRail',
   props: {
-    class: {
+    className: {
       type: String,
       default: ''
     }
   },
-  setup(props) {
-    const { toggleSidebar } = useSidebar()
+  setup(props, { slots }) {
+    // Default toggle function that does nothing
+    let toggleSidebar = () => {
+      console.warn('No SidebarProvider found for SidebarRail')
+    }
+    
+    try {
+      const context = useSidebar()
+      toggleSidebar = context.toggleSidebar
+    } catch (error) {
+      // Use default if no context available
+    }
 
     return () => h('div', {
       class: cn(
-        'absolute bottom-4 right-0 translate-x-1/2 cursor-pointer rounded-full border border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] p-1 shadow-md',
-        props.class
+        'absolute right-0 top-0 h-full w-2 cursor-col-resize border-l border-sidebar-border opacity-0 transition-opacity group-hover:opacity-100',
+        props.className
       ),
       onClick: toggleSidebar
-    }, [
-      h('svg', {
-        xmlns: 'http://www.w3.org/2000/svg',
-        width: '16',
-        height: '16',
-        viewBox: '0 0 24 24',
-        fill: 'none',
-        stroke: 'currentColor',
-        'stroke-width': '2',
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round'
-      }, [
-        h('path', { d: 'M15 18l-6-6 6-6' })
-      ])
-    ])
+    }, slots.default?.())
   }
 }) 

@@ -7,7 +7,7 @@ const props = defineProps<{
     id: string;
     label: string;
     placeholder?: string;
-    type?: 'text' | 'select';
+    type?: 'text' | 'select' | 'date';
     options?: Array<{ value: string; label: string }>;
     value: string;
   }>;
