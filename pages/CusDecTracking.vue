@@ -298,29 +298,29 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
   <div class="min-h-screen pb-16 bg-gray-50">
     <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <header class="flex items-center justify-between py-4 mb-6 border-b border-gray-200 sm:py-6">
-        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">CusDec Tracking</h1>
+      <header class="flex items-center justify-between py-3 mb-4 border-b border-gray-200 sm:py-4">
+        <h1 class="text-lg font-medium text-gray-800 sm:text-xl">CusDec Tracking</h1>
         
         <div>
           <button 
             @click="toggleSidebar" 
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="flex items-center px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
             </svg>
             <span>Filters</span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              width="16" 
-              height="16" 
+              width="12" 
+              height="12" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="ml-2 transition-transform" 
+              class="ml-1.5 transition-transform" 
               :class="{ 'rotate-0': isMobile ? showSidebar : showFilters, 'rotate-180': isMobile ? !showSidebar : !showFilters }"
             >
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -330,14 +330,14 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       </header>
       
       <!-- Status Tabs -->
-      <div class="p-2 mb-6 overflow-x-auto bg-white rounded-lg shadow-sm">
-        <div class="flex space-x-2">
+      <div class="mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+        <div class="flex p-1.5 space-x-1 border-b border-gray-100">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'

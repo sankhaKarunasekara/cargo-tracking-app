@@ -314,36 +314,36 @@ onUnmounted(() => {
   <div class="min-h-screen pb-16 bg-gray-50">
     <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
       <!-- Page Header -->
-      <header class="flex items-center justify-between py-4 mb-6 border-b border-gray-200 sm:py-6">
-        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">Container Tracking</h1>
+      <header class="flex items-center justify-between py-3 mb-4 border-b border-gray-200 sm:py-4">
+        <h1 class="text-lg font-medium text-gray-800 sm:text-xl">Container Tracking</h1>
         
         <div>
           <button 
             @click="toggleFilters" 
             :class="[
-              'flex items-center px-3 py-2 text-sm font-medium transition-colors border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+              'flex items-center px-2.5 py-1.5 text-xs font-medium transition-colors border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500',
               hasActiveFilters ? 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
             ]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
             </svg>
             <span>Filters</span>
             <!-- Filter applied badge -->
-            <span v-if="hasCusdecFilter" class="flex items-center justify-center w-5 h-5 ml-2 text-xs font-medium text-white bg-blue-600 rounded-full">
+            <span v-if="hasCusdecFilter" class="flex items-center justify-center w-4 h-4 ml-1.5 text-xs font-medium text-white bg-blue-600 rounded-full">
               1
             </span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              width="16" 
-              height="16" 
+              width="12" 
+              height="12" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="ml-2 transition-transform" 
+              class="ml-1.5 transition-transform" 
               :class="{ 'rotate-0': showFilters, 'rotate-180': !showFilters }"
             >
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -353,11 +353,11 @@ onUnmounted(() => {
       </header>
       
       <!-- Active Filters Display (when filters are applied but not expanded) -->
-      <div v-if="hasCusdecFilter && !showFilters" class="flex p-3 mb-4 space-x-2 bg-white rounded-lg shadow-sm">
+      <div v-if="hasCusdecFilter && !showFilters" class="flex p-2 mb-4 space-x-2 bg-white rounded-lg shadow-sm">
         <div class="flex items-center">
-          <span class="text-sm font-medium text-gray-700">Filtered by:</span>
+          <span class="text-xs font-medium text-gray-700">Filtered by:</span>
         </div>
-        <div class="flex items-center px-3 py-1 text-sm border border-blue-100 rounded-full bg-blue-50">
+        <div class="flex items-center px-2 py-0.5 text-xs border border-blue-100 rounded-full bg-blue-50">
           <span class="font-medium text-blue-800">CusDec: {{ filters.find(f => f.id === 'cusdec')?.value }}</span>
           <button 
             @click="() => { 
@@ -365,9 +365,9 @@ onUnmounted(() => {
               if (cusdecFilter) cusdecFilter.value = ''; 
               if (route.query.cusdec) router.replace({ query: { ...route.query, cusdec: undefined } })
             }" 
-            class="ml-1.5 text-blue-600 hover:text-blue-800"
+            class="ml-1 text-blue-600 hover:text-blue-800"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -376,14 +376,14 @@ onUnmounted(() => {
       </div>
       
       <!-- Status Tabs -->
-      <div class="p-2 mb-6 overflow-x-auto bg-white rounded-lg shadow-sm">
-        <div class="flex space-x-2">
+      <div class="mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+        <div class="flex p-1.5 space-x-1 border-b border-gray-100">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'
