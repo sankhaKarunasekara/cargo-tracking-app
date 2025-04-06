@@ -1,1 +1,1 @@
-export { default } from "file:///F:/Projects/cargo-tracking-app/node_modules/.pnpm/@nuxt+vite-builder@3.16.2_l_f5d5969469289211b02f692b65ffb38f/node_modules/@nuxt/vite-builder/dist/runtime/client.manifest.mjs"
+export { default } from "file:///F:/Projects/cargo-tracking-app/node_modules/.pnpm/@nuxt+vite-builder@3.16.2_@_a00d6d4180a03cee2eb661d1567b42f0/node_modules/@nuxt/vite-builder/dist/runtime/client.manifest.mjs"

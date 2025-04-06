@@ -1018,7 +1018,7 @@ if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
 window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
 `;
 
-const _dARq5YSigOVwhtKMcozJIMT0ZbPhpd3Z19Re3tbSkWk = (function(nitro) {
+const _Or2gc28P6hoSNen6MNOZuqFyuEX4bYhDqYlNVBQ_IGk = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script}<\/script>`);
   });
@@ -1043,7 +1043,7 @@ const devReducers = {
   URL: (data) => data instanceof URL ? data.toString() : void 0
 };
 const asyncContext = getContext("nuxt-dev", { asyncContext: true, AsyncLocalStorage });
-const _o4Lh9GU318TuqZ6o4P_7xxK7i835zul2V56BWLMzjsI = (nitroApp) => {
+const _6jR3ftqjAA6AwPFLtKzpBG8ekQsZ_OM423pwGM26B0E = (nitroApp) => {
   const handler = nitroApp.h3App.handler;
   nitroApp.h3App.handler = (event) => {
     return asyncContext.callAsync({ logs: [], event }, () => handler(event));
@@ -1113,8 +1113,8 @@ function onConsoleLog(callback) {
 }
 
 const plugins = [
-  _dARq5YSigOVwhtKMcozJIMT0ZbPhpd3Z19Re3tbSkWk,
-_o4Lh9GU318TuqZ6o4P_7xxK7i835zul2V56BWLMzjsI
+  _Or2gc28P6hoSNen6MNOZuqFyuEX4bYhDqYlNVBQ_IGk,
+_6jR3ftqjAA6AwPFLtKzpBG8ekQsZ_OM423pwGM26B0E
 ];
 
 function defineRenderHandler(render) {
@@ -1223,12 +1223,12 @@ const _MUGSi7 = lazyEventHandler(() => {
   return useBase(opts.baseURL, ipxHandler);
 });
 
-const _lazy_2V2o_y = () => Promise.resolve().then(function () { return renderer$1; });
+const _lazy_ZmhYpV = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
-  { route: '/__nuxt_error', handler: _lazy_2V2o_y, lazy: true, middleware: false, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_ZmhYpV, lazy: true, middleware: false, method: undefined },
   { route: '/_ipx/**', handler: _MUGSi7, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_2V2o_y, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_ZmhYpV, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {

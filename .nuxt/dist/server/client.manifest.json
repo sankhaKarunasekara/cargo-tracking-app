@@ -7,12 +7,12 @@
     "module": true,
     "resourceType": "script"
   },
-  "F:/Projects/cargo-tracking-app/node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/entry.js": {
+  "F:/Projects/cargo-tracking-app/node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_883c18b779f1611e35935ad0e7789ec0/node_modules/nuxt/dist/app/entry.js": {
     "resourceType": "script",
     "module": true,
     "prefetch": true,
     "preload": true,
     "isEntry": true,
-    "file": "F:/Projects/cargo-tracking-app/node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/entry.js"
+    "file": "F:/Projects/cargo-tracking-app/node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_883c18b779f1611e35935ad0e7789ec0/node_modules/nuxt/dist/app/entry.js"
   }
 }
