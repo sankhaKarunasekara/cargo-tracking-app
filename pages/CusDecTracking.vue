@@ -200,11 +200,17 @@ const filteredCusDecs = computed(() => {
     });
   }
   
-  // Sort results to prioritize "Processing" items if in "All" tab
+  // Sort results to prioritize "Waiting Confirmation" items first, then "Processing" items if in "All" tab
   if (activeStatusFilter.value === 'all') {
     filtered.sort((a, b) => {
+      // First priority: Waiting Confirmation status
+      if (a.status.toLowerCase() === 'waiting confirmation' && b.status.toLowerCase() !== 'waiting confirmation') return -1;
+      if (a.status.toLowerCase() !== 'waiting confirmation' && b.status.toLowerCase() === 'waiting confirmation') return 1;
+      
+      // Second priority: Processing status
       if (a.status === 'Processing' && b.status !== 'Processing') return -1;
       if (a.status !== 'Processing' && b.status === 'Processing') return 1;
+      
       return 0;
     });
   }

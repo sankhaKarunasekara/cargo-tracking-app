@@ -58,6 +58,18 @@ const handleViewContainers = () => {
   router.push(`/ContainerTracking?cusdec=${encodeURIComponent(props.cusdec.cusdecNumber)}`);
 };
 
+// Compute card class based on status
+const cardClass = computed(() => {
+  const baseClass = "mb-5 overflow-hidden transition-all duration-200 rounded-lg shadow-sm hover:shadow-md";
+  
+  // Add yellow background and border for waiting confirmation status
+  if (props.cusdec.status.toLowerCase() === 'waiting confirmation') {
+    return `${baseClass} bg-yellow-50 border-2 border-yellow-300`;
+  }
+  
+  return `${baseClass} border border-gray-100`;
+});
+
 // Get default office code if not provided
 const officeCode = computed(() => {
   return props.cusdec.officeCode || 'CBHQ1';
@@ -213,7 +225,7 @@ const features = {
 </script>
 
 <template>
-  <Card class="mb-5 overflow-hidden transition-all duration-200 border border-gray-100 rounded-lg shadow-sm hover:shadow-md">
+  <Card :class="cardClass">
     <!-- Mobile Card Layout (display only on small screens) -->
     <div class="lg:hidden">
       <!-- Card Header -->
@@ -288,8 +300,9 @@ const features = {
         
         <!-- Update the mobile view: Yard/Destination and Channel -->
         <div class="flex flex-wrap items-center gap-2 mt-4">
-          <!-- Yard Location -->
+          <!-- Yard Location - hide for Waiting Confirmation -->
           <div 
+            v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
             :class="[
               'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
               getYardLocationColor.bg,
@@ -319,7 +332,10 @@ const features = {
       </div>
       
       <!-- Mobile Card Layout Footer -->
-      <div class="flex items-center justify-end px-6 py-4 bg-gray-50">
+      <div 
+        class="flex items-center justify-end px-6 py-4"
+        :class="cusdec.status.toLowerCase() === 'waiting confirmation' ? 'bg-yellow-50' : 'bg-gray-50'"
+      >
         <!-- Action buttons -->
         <div class="flex space-x-2">
           <!-- Show Acknowledge button for Waiting Confirmation status -->
@@ -348,8 +364,9 @@ const features = {
             Track
           </button>
           
-          <!-- View Containers Button -->
+          <!-- View Containers Button - hide for Waiting Confirmation status -->
           <button
+            v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
             @click="handleViewContainers"
             class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium transition-colors rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
@@ -442,8 +459,9 @@ const features = {
           
           <!-- Update the desktop view: Yard/Destination and Channel -->
           <div class="flex flex-wrap items-center gap-2 mt-4">
-            <!-- Yard Location -->
+            <!-- Yard Location - hide for Waiting Confirmation -->
             <div 
+              v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
               :class="[
                 'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
                 getYardLocationColor.bg,
@@ -474,7 +492,10 @@ const features = {
       </div>
       
       <!-- Right Column for Action Buttons -->
-      <div class="flex flex-col justify-center flex-shrink-0 w-56 p-6 border-l border-gray-100 bg-gray-50">
+      <div 
+        class="flex flex-col justify-center flex-shrink-0 w-56 p-6 border-l" 
+        :class="cusdec.status.toLowerCase() === 'waiting confirmation' ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-100'"
+      >
         <div class="flex flex-col gap-3">
           <!-- Show Acknowledge button for Waiting Confirmation status -->
           <ButtonComponent
@@ -524,8 +545,9 @@ const features = {
             Track
           </button>
           
-          <!-- View Containers Button -->
+          <!-- View Containers Button - hide for Waiting Confirmation status -->
           <button
+            v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
             @click="handleViewContainers"
             class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
           >
