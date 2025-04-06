@@ -6,6 +6,7 @@ import { ref, computed } from 'vue'
 import { AnonymizedCusDecRecord, AnonymizedContainer, yardLocationColors, YardLocations } from '../lib/data/anonymizedCusDecData'
 import { mapCusDecStatusToYardLocation } from '../lib/data'
 import { useRouter } from 'vue-router'
+import ItemDetailsSheet from './ItemDetailsSheet.vue'
 
 // Add additional type information to support the component properties
 interface ExtendedCusDecRecord extends AnonymizedCusDecRecord {
@@ -28,10 +29,18 @@ const emit = defineEmits<{
   'acknowledge': [cusdec: ExtendedCusDecRecord];
 }>();
 
+// Add state for the details sheet
+const showDetailsSheet = ref(false)
+
 // Method to handle view details click
 const handleViewDetails = () => {
   emit('view-details', props.cusdec);
-  router.push(`/cusdec/${props.cusdec.id}`);
+  
+  // Show the details sheet instead of navigating
+  showDetailsSheet.value = true;
+  
+  // Only navigate if you still want that behavior as well
+  // router.push(`/cusdec/${props.cusdec.id}`);
 };
 
 // Method to handle view timeline click
@@ -554,6 +563,13 @@ const features = {
       </div>
     </div>
   </Card>
+  
+  <!-- Add the item details sheet at the bottom of the template -->
+  <ItemDetailsSheet
+    v-model:isOpen="showDetailsSheet"
+    :itemId="cusdec.id"
+    itemType="cusdec"
+  />
 </template>
 
 <style scoped>

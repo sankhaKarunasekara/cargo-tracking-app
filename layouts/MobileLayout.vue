@@ -88,8 +88,7 @@ const router = useRouter();
 // Determine if we should show the back button (for detail pages)
 const shouldShowBackButton = computed(() => {
   const path = route.path;
-  return path.includes('/CusDecDetail/') ||
-         path.includes('/ContainerDetail/') ||
+  return path.includes('/ContainerDetail/') ||
          path.includes('/StatusTimelinePage') ||
          path.includes('/AcceptCusDec');
 });
@@ -98,9 +97,7 @@ const shouldShowBackButton = computed(() => {
 const pageTitle = computed(() => {
   const path = route.path;
   
-  if (path.includes('/CusDecDetail/')) {
-    return 'CusDec Details';
-  } else if (path.includes('/ContainerDetail/')) {
+  if (path.includes('/ContainerDetail/')) {
     return 'Container Details';
   } else if (path.includes('/StatusTimelinePage')) {
     return 'Status Timeline';

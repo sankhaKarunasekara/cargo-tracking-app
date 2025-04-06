@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import StatusTimelineSheet from '../components/StatusTimelineSheet.vue'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
+// import ItemDetailsSheet from '../components/ItemDetailsSheet.vue'
 import { 
   getAllCusDecData, 
   filterCusDecs, 
@@ -62,10 +63,6 @@ const filters = ref<FilterDefinition[]>([...cusDecFilterDefinitions])
 // Get real data from our anonymized dataset
 const allCusDecs = ref<AnonymizedCusDecRecord[]>(getAllCusDecData())
 
-// Detail state
-const showDetails = ref(false)
-const selectedItem = ref<AnonymizedCusDecRecord | null>(null)
-
 // Sidebar and filter visibility state
 const showSidebar = ref(false)
 const showFilters = ref(false)
@@ -77,6 +74,10 @@ const selectedTimelineItem = ref({
   type: 'cusdec',
   status: ''
 })
+
+// Details sheet state
+const detailsSheetOpen = ref(false)
+const selectedCusDecId = ref('')
 
 // Set sidebar and filters visibility based on screen size
 onMounted(() => {
@@ -255,17 +256,6 @@ const handlePageChange = (page: number) => {
   currentPage.value = page
 }
 
-// Handle view details
-const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
-  selectedItem.value = cusdec;
-  showDetails.value = true;
-}
-
-// Handle close details
-const handleCloseDetails = () => {
-  showDetails.value = false
-}
-
 // Handle view timeline
 const handleViewTimeline = (cusdec: AnonymizedCusDecRecord) => {
   selectedTimelineItem.value = {
@@ -274,6 +264,12 @@ const handleViewTimeline = (cusdec: AnonymizedCusDecRecord) => {
     status: cusdec.status
   }
   timelineSheetOpen.value = true
+}
+
+// Handle view details
+const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
+  selectedCusDecId.value = cusdec.id
+  detailsSheetOpen.value = true
 }
 
 // Add table headers for desktop view
@@ -297,7 +293,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
     <div class="container px-4 mx-auto sm:px-6 lg:px-8">
       <!-- Page Header -->
       <header class="flex items-center justify-between py-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">CusDec Tracking</h1>
+        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">CusDec Tracking</h1>
         
         <div>
           <button 
@@ -440,7 +436,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       <div class="flex flex-col md:flex-row md:space-x-5">
         <!-- Side Panel with filters (only visible on desktop) -->
         <div 
-          class="hidden md:block md:w-80 xl:w-80 lg:w-64 bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-5 rounded-lg transition-all duration-200"
+          class="flex-shrink-0 hidden h-auto mb-5 transition-all duration-200 bg-white rounded-lg shadow-sm md:block md:w-80 xl:w-80 lg:w-64 md:sticky md:top-16 md:self-start"
           v-if="!isMobile && showFilters"
         >
           <div class="p-5 lg:p-4">
@@ -556,7 +552,7 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
             <div v-else>
               <!-- Results count indicator -->
               <div class="flex flex-col mb-5 md:flex-row md:items-center md:justify-between">
-                <p class="text-sm text-gray-500 mb-2 md:mb-0">Found {{ filteredCusDecs.length }} CusDec records</p>
+                <p class="mb-2 text-sm text-gray-500 md:mb-0">Found {{ filteredCusDecs.length }} CusDec records</p>
               </div>
               
               <!-- Card-based layout for all screen sizes -->
@@ -565,8 +561,8 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
                 v-for="cusdec in paginatedCusDecs"
                 :key="cusdec.id"
                 :cusdec="cusdec"
-                @view-details="handleViewDetails" 
                 @view-timeline="handleViewTimeline"
+                @view-details="handleViewDetails"
                 class="mb-5" 
               />
                 
@@ -652,65 +648,6 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
     <!-- Bottom navigation -->
     <AppBottomNavigation />
     
-    <!-- Detail modal -->
-    <div 
-      v-if="showDetails" 
-      class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
-    >
-      <div class="w-full max-w-2xl p-0 mx-4 overflow-hidden bg-white rounded-lg shadow-xl">
-        <div class="flex items-center justify-between p-5 border-b">
-          <h3 class="text-lg font-semibold text-gray-900">CusDec Details</h3>
-          <button @click="handleCloseDetails" class="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="p-6 space-y-6">
-          <div v-if="selectedItem" class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">CusDec Number</p>
-              <p class="font-medium">{{ selectedItem.cusdecNumber }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Status</p>
-              <p class="font-medium">
-                <span :class="getStatusBadgeClass(selectedItem.status)">
-                  {{ selectedItem.status }}
-                </span>
-              </p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Consignee</p>
-              <p class="font-medium">{{ selectedItem.consigneeName }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Declarant</p>
-              <p class="font-medium">{{ selectedItem.declarantName }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Invoice Value</p>
-              <p class="font-medium">{{ selectedItem.invoiceValue }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Origin Country</p>
-              <p class="font-medium">{{ selectedItem.originCountry }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Container Count</p>
-              <p class="font-medium">{{ selectedItem.containerCount }}</p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg">
-              <p class="text-sm text-gray-500 mb-1">Incoterm</p>
-              <p class="font-medium">{{ selectedItem.incoterm }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
     <!-- Status Timeline Sheet -->
     <StatusTimelineSheet
       v-model:isOpen="timelineSheetOpen"
@@ -718,5 +655,12 @@ const formatDate = (dateString: string) => formatCusDecDate(dateString);
       :itemType="selectedTimelineItem.type"
       :status="selectedTimelineItem.status"
     />
+    
+    <!-- Details Sheet for CusDec information -->
+    <!-- <ItemDetailsSheet
+      v-model:isOpen="detailsSheetOpen"
+      :itemId="selectedCusDecId"
+      itemType="cusdec"
+    /> -->
   </div>
 </template> 

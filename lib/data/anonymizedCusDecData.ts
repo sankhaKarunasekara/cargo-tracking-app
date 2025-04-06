@@ -300,7 +300,7 @@ export const anonymizedContainers: AnonymizedContainer[] = [
   {
     id: "CONT-45837492",
     number: "HLXU3948576",
-    cusdecId: "CBHQ-I-13028",
+    cusdecId: "CUS-12748523",
     size: "40ft",
     type: "Dry",
     status: "Officer Checked",
@@ -315,7 +315,7 @@ export const anonymizedContainers: AnonymizedContainer[] = [
   {
     id: "CONT-45849265",
     number: "HLXU4857693",
-    cusdecId: "CBHQ-I-13028",
+    cusdecId: "CUS-12748523",
     size: "20ft",
     type: "Dry",
     status: "Officer Checked",
@@ -330,7 +330,7 @@ export const anonymizedContainers: AnonymizedContainer[] = [
   {
     id: "CONT-45856379",
     number: "COSU5746382",
-    cusdecId: "CBHQ-I-13156",
+    cusdecId: "CUS-12759682",
     size: "40ft",
     type: "Flat Rack",
     status: "Detained",
@@ -345,7 +345,7 @@ export const anonymizedContainers: AnonymizedContainer[] = [
   {
     id: "CONT-45867594",
     number: "COSU6857493",
-    cusdecId: "CBHQ-I-13156",
+    cusdecId: "CUS-12759682",
     size: "40ft",
     type: "Flat Rack",
     status: "Detained",
@@ -360,7 +360,7 @@ export const anonymizedContainers: AnonymizedContainer[] = [
   {
     id: "CONT-45892176",
     number: "OOLU7865421",
-    cusdecId: "CBHQ-I-12712",
+    cusdecId: "CUS-12712517",
     size: "40ft",
     type: "Dry",
     status: "Registered",

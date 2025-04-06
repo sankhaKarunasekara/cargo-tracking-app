@@ -18,6 +18,7 @@ interface _GlobalComponents {
     'ContainerStatus': typeof import("../components/ContainerStatus.vue")['default']
     'CusDecCard': typeof import("../components/CusDecCard.vue")['default']
     'FilterSection': typeof import("../components/FilterSection.vue")['default']
+    'ItemDetailsSheet': typeof import("../components/ItemDetailsSheet.vue")['default']
     'Navbar': typeof import("../components/Navbar.vue")['default']
     'StatusTimeline': typeof import("../components/StatusTimeline.vue")['default']
     'StatusTimelineButton': typeof import("../components/StatusTimelineButton.vue")['default']
@@ -72,6 +73,10 @@ interface _GlobalComponents {
     'SidebarSeparator': typeof import("../components/ui/sidebar/index")['SidebarSeparator']
     'SidebarTrigger': typeof import("../components/ui/sidebar/index")['SidebarTrigger']
     'SidebarRail': typeof import("../components/ui/sidebar/index")['SidebarRail']
+    'Tabs': typeof import("../components/ui/tabs/index")['Tabs']
+    'TabsList': typeof import("../components/ui/tabs/index")['TabsList']
+    'TabsTrigger': typeof import("../components/ui/tabs/index")['TabsTrigger']
+    'TabsContent': typeof import("../components/ui/tabs/index")['TabsContent']
     'Timeline': typeof import("../components/ui/timeline/index")['Timeline']
     'TimelineItem': typeof import("../components/ui/timeline/index")['TimelineItem']
     'NuxtPage': typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']
@@ -92,6 +97,7 @@ interface _GlobalComponents {
     'LazyContainerStatus': LazyComponent<typeof import("../components/ContainerStatus.vue")['default']>
     'LazyCusDecCard': LazyComponent<typeof import("../components/CusDecCard.vue")['default']>
     'LazyFilterSection': LazyComponent<typeof import("../components/FilterSection.vue")['default']>
+    'LazyItemDetailsSheet': LazyComponent<typeof import("../components/ItemDetailsSheet.vue")['default']>
     'LazyNavbar': LazyComponent<typeof import("../components/Navbar.vue")['default']>
     'LazyStatusTimeline': LazyComponent<typeof import("../components/StatusTimeline.vue")['default']>
     'LazyStatusTimelineButton': LazyComponent<typeof import("../components/StatusTimelineButton.vue")['default']>
@@ -146,6 +152,10 @@ interface _GlobalComponents {
     'LazySidebarSeparator': LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarSeparator']>
     'LazySidebarTrigger': LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarTrigger']>
     'LazySidebarRail': LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarRail']>
+    'LazyTabs': LazyComponent<typeof import("../components/ui/tabs/index")['Tabs']>
+    'LazyTabsList': LazyComponent<typeof import("../components/ui/tabs/index")['TabsList']>
+    'LazyTabsTrigger': LazyComponent<typeof import("../components/ui/tabs/index")['TabsTrigger']>
+    'LazyTabsContent': LazyComponent<typeof import("../components/ui/tabs/index")['TabsContent']>
     'LazyTimeline': LazyComponent<typeof import("../components/ui/timeline/index")['Timeline']>
     'LazyTimelineItem': LazyComponent<typeof import("../components/ui/timeline/index")['TimelineItem']>
     'LazyNuxtPage': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']>
@@ -172,6 +182,7 @@ export const ContainerCard: typeof import("../components/ContainerCard.vue")['de
 export const ContainerStatus: typeof import("../components/ContainerStatus.vue")['default']
 export const CusDecCard: typeof import("../components/CusDecCard.vue")['default']
 export const FilterSection: typeof import("../components/FilterSection.vue")['default']
+export const ItemDetailsSheet: typeof import("../components/ItemDetailsSheet.vue")['default']
 export const Navbar: typeof import("../components/Navbar.vue")['default']
 export const StatusTimeline: typeof import("../components/StatusTimeline.vue")['default']
 export const StatusTimelineButton: typeof import("../components/StatusTimelineButton.vue")['default']
@@ -226,6 +237,10 @@ export const SidebarMenuAction: typeof import("../components/ui/sidebar/index")[
 export const SidebarSeparator: typeof import("../components/ui/sidebar/index")['SidebarSeparator']
 export const SidebarTrigger: typeof import("../components/ui/sidebar/index")['SidebarTrigger']
 export const SidebarRail: typeof import("../components/ui/sidebar/index")['SidebarRail']
+export const Tabs: typeof import("../components/ui/tabs/index")['Tabs']
+export const TabsList: typeof import("../components/ui/tabs/index")['TabsList']
+export const TabsTrigger: typeof import("../components/ui/tabs/index")['TabsTrigger']
+export const TabsContent: typeof import("../components/ui/tabs/index")['TabsContent']
 export const Timeline: typeof import("../components/ui/timeline/index")['Timeline']
 export const TimelineItem: typeof import("../components/ui/timeline/index")['TimelineItem']
 export const NuxtPage: typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']
@@ -246,6 +261,7 @@ export const LazyContainerCard: LazyComponent<typeof import("../components/Conta
 export const LazyContainerStatus: LazyComponent<typeof import("../components/ContainerStatus.vue")['default']>
 export const LazyCusDecCard: LazyComponent<typeof import("../components/CusDecCard.vue")['default']>
 export const LazyFilterSection: LazyComponent<typeof import("../components/FilterSection.vue")['default']>
+export const LazyItemDetailsSheet: LazyComponent<typeof import("../components/ItemDetailsSheet.vue")['default']>
 export const LazyNavbar: LazyComponent<typeof import("../components/Navbar.vue")['default']>
 export const LazyStatusTimeline: LazyComponent<typeof import("../components/StatusTimeline.vue")['default']>
 export const LazyStatusTimelineButton: LazyComponent<typeof import("../components/StatusTimelineButton.vue")['default']>
@@ -300,6 +316,10 @@ export const LazySidebarMenuAction: LazyComponent<typeof import("../components/u
 export const LazySidebarSeparator: LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarSeparator']>
 export const LazySidebarTrigger: LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarTrigger']>
 export const LazySidebarRail: LazyComponent<typeof import("../components/ui/sidebar/index")['SidebarRail']>
+export const LazyTabs: LazyComponent<typeof import("../components/ui/tabs/index")['Tabs']>
+export const LazyTabsList: LazyComponent<typeof import("../components/ui/tabs/index")['TabsList']>
+export const LazyTabsTrigger: LazyComponent<typeof import("../components/ui/tabs/index")['TabsTrigger']>
+export const LazyTabsContent: LazyComponent<typeof import("../components/ui/tabs/index")['TabsContent']>
 export const LazyTimeline: LazyComponent<typeof import("../components/ui/timeline/index")['Timeline']>
 export const LazyTimelineItem: LazyComponent<typeof import("../components/ui/timeline/index")['TimelineItem']>
 export const LazyNuxtPage: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']>

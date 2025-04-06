@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, provide, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, provide, onUnmounted, watch, nextTick } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
 import Pagination from '../components/ui/pagination'
@@ -73,9 +73,9 @@ const itemsPerPage = 5
 const totalPages = computed(() => Math.ceil(filteredContainers.value.length / itemsPerPage))
 const displayedItemsCount = ref(itemsPerPage)
 
-// Modal state
-const selectedContainer = ref<AnonymizedContainer | null>(null)
-const showDetailsModal = ref(false)
+// Details sheet state
+const detailsSheetOpen = ref(false)
+const selectedContainerId = ref('')
 const showFilters = ref(false)
 
 // Timeline sheet state
@@ -166,8 +166,8 @@ const handleFilterUpdate = (updatedFilters: any[]) => {
 
 // Handle view details
 const handleViewDetails = (container: AnonymizedContainer) => {
-  selectedContainer.value = container
-  showDetailsModal.value = true
+  selectedContainerId.value = container.id
+  detailsSheetOpen.value = true
 }
 
 // Handle view timeline
@@ -204,6 +204,34 @@ const handleReset = () => {
 // Provide the toggleFilters function to the navbar
 provide('toggleFilters', toggleFilters)
 
+// Add a ref for the container list for scrolling
+const containerListRef = ref<HTMLElement | null>(null)
+
+// Function to scroll to the container list
+const scrollToContainerList = () => {
+  // Wait for next tick to ensure DOM is updated
+  nextTick(() => {
+    // Add a small delay to ensure complete rendering
+    setTimeout(() => {
+      if (containerListRef.value && filteredContainers.value.length > 0) {
+        // Try smooth scrolling first
+        try {
+          containerListRef.value.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        } catch (error) {
+          // Fallback for browsers that don't support smooth scrolling
+          window.scrollTo({
+            top: containerListRef.value.offsetTop - 20,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }, 300);
+  });
+};
+
 // Initialize with cusdec filter
 onMounted(() => {
   document.addEventListener('toggle-filters', toggleFilters)
@@ -236,9 +264,20 @@ onMounted(() => {
       // Reset pagination
       currentPage.value = 1
       displayedItemsCount.value = itemsPerPage
+      
+      // Scroll to container list
+      scrollToContainerList();
     }
   }
 })
+
+// Watch for filtered containers change to scroll to top container
+watch(() => filteredContainers.value.length, (newLength, oldLength) => {
+  if (newLength > 0 && hasCusdecFilter.value && oldLength === 0) {
+    // If we just got results after having none and have a cusdec filter, scroll to container list
+    scrollToContainerList();
+  }
+}, { immediate: false })
 
 // Watch for URL changes to update filters
 watch(() => route.query.cusdec, (newCusdec) => {
@@ -318,7 +357,7 @@ onUnmounted(() => {
         <div class="flex items-center">
           <span class="text-sm font-medium text-gray-700">Filtered by:</span>
         </div>
-        <div class="flex items-center px-3 py-1 text-sm bg-blue-50 border border-blue-100 rounded-full">
+        <div class="flex items-center px-3 py-1 text-sm border border-blue-100 rounded-full bg-blue-50">
           <span class="font-medium text-blue-800">CusDec: {{ filters.find(f => f.id === 'cusdec')?.value }}</span>
           <button 
             @click="() => { 
@@ -484,8 +523,8 @@ onUnmounted(() => {
                 <p class="mb-2 text-sm text-gray-500 md:mb-0">Found {{ filteredContainers.length }} containers</p>
               </div>
               
-              <!-- Container cards -->
-              <div class="w-full space-y-5">
+              <!-- Container cards - this ref is used for automatic scrolling -->
+              <div class="w-full space-y-5" ref="containerListRef">
                 <ContainerCard
                   v-for="container in paginatedContainers"
                   :key="container.id"
@@ -540,6 +579,13 @@ onUnmounted(() => {
       :itemType="selectedTimelineItem.type"
       :status="selectedTimelineItem.status"
     />
+    
+    <!-- Container Details Sheet -->
+    <!-- <ItemDetailsSheet
+      v-model:isOpen="detailsSheetOpen"
+      :itemId="selectedContainerId"
+      itemType="container"
+    /> -->
   </div>
 </template>
 

@@ -139,6 +139,28 @@ export function getContainersByCusDecNumber(cusdecNumber: string): AnonymizedCon
 }
 
 /**
+ * Check if two CusDec IDs match, accounting for different formats
+ */
+export function areCusDecIdsMatching(containerId: string, cusDecId: string): boolean {
+  // Direct match
+  if (containerId === cusDecId) {
+    return true;
+  }
+  
+  // Extract numeric parts for partial matching
+  const extractNumeric = (id: string): string => {
+    return id.replace(/[^0-9]/g, '');
+  };
+  
+  const containerNumeric = extractNumeric(containerId);
+  const cusDecNumeric = extractNumeric(cusDecId);
+  
+  // Check if one contains the other
+  return containerNumeric.includes(cusDecNumeric) || 
+         cusDecNumeric.includes(containerNumeric);
+}
+
+/**
  * Filter containers based on criteria
  */
 export function filterContainers(criteria: {
@@ -151,45 +173,19 @@ export function filterContainers(criteria: {
   startDate?: string;
   endDate?: string;
 }): AnonymizedContainer[] {
-  // If cusdecNumber is provided, use it to find matching containers directly
-  if (criteria.cusdecNumber) {
-    const matchedByNumber = getContainersByCusDecNumber(criteria.cusdecNumber);
-    if (matchedByNumber.length > 0) {
-      // Apply remaining filters to the matched containers
-      return matchedByNumber.filter(container => {
-        // Apply remaining filters
-        if (criteria.containerNumber && !container.number.toLowerCase().includes(criteria.containerNumber.toLowerCase())) {
-          return false;
-        }
-        
-        if (criteria.location && !container.location.toLowerCase().includes(criteria.location.toLowerCase())) {
-          return false;
-        }
-        
-        if (criteria.status && container.status.toLowerCase() !== criteria.status.toLowerCase()) {
-          return false;
-        }
-        
-        if (criteria.channel && container.channel !== criteria.channel) {
-          return false;
-        }
-        
-        if (criteria.startDate && criteria.endDate) {
-          const containerDate = new Date(container.lastUpdated);
-          const startDate = new Date(criteria.startDate);
-          const endDate = new Date(criteria.endDate);
-          
-          if (containerDate < startDate || containerDate > endDate) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
+  // If cusdecNumber is provided, find corresponding cusdecId
+  let cusdecIdToFilter = criteria.cusdecId;
+  
+  if (criteria.cusdecNumber && !criteria.cusdecId) {
+    // Find the CusDec record with this cusdecNumber
+    const cusdecRecord = anonymizedCusDecData.find(
+      record => record.cusdecNumber === criteria.cusdecNumber
+    );
+    if (cusdecRecord) {
+      cusdecIdToFilter = cusdecRecord.id;
     }
   }
   
-  // Continue with regular filtering if no cusdecNumber is provided or no matches were found
   return anonymizedContainers.filter(container => {
     // Filter by container number if provided
     if (criteria.containerNumber && !container.number.toLowerCase().includes(criteria.containerNumber.toLowerCase())) {
@@ -211,8 +207,8 @@ export function filterContainers(criteria: {
       return false;
     }
     
-    // Filter by CusDec ID if provided
-    if (criteria.cusdecId && container.cusdecId !== criteria.cusdecId) {
+    // Filter by CusDec ID if provided, using flexible matching
+    if (cusdecIdToFilter && !areCusDecIdsMatching(container.cusdecId, cusdecIdToFilter)) {
       return false;
     }
     
@@ -432,7 +428,7 @@ export function getContainerTrackingByNumber(containerNumber: string): Container
 }
 
 /**
- * Get cargo items for a specific cusdec ID
+ * Get cargo items for a specific CusDec
  */
 export function getCargoItemsByCusDecId(cusdecId: string): CargoItem[] {
   return cargoItemsData.filter(item => item.instanceId === cusdecId);

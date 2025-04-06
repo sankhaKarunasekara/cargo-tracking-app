@@ -15,6 +15,7 @@ import {
   getContainerFeatures
 } from '../lib/data'
 import { useRouter } from 'vue-router'
+import ItemDetailsSheet from './ItemDetailsSheet.vue'
 
 // Add additional type information to support the component properties
 interface ExtendedContainer extends AnonymizedContainer {
@@ -36,10 +37,18 @@ const emit = defineEmits<{
   'view-timeline': [container: ExtendedContainer];
 }>();
 
+// Add state for the details sheet
+const showDetailsSheet = ref(false)
+
 // Method to handle view details click
 const handleViewDetails = () => {
   emit('view-details', props.container);
-  router.push(`/container/${props.container.id}`);
+  
+  // Show the details sheet instead of navigating
+  showDetailsSheet.value = true;
+  
+  // Only navigate if you still want that behavior as well
+  // router.push(`/container/${props.container.id}`);
 };
 
 // Method to handle view timeline click
@@ -395,6 +404,13 @@ const getLocationColor = computed(() => {
       </div>
     </div>
   </Card>
+  
+  <!-- Add the item details sheet at the bottom of the template -->
+  <ItemDetailsSheet
+    v-model:isOpen="showDetailsSheet"
+    :itemId="container.id"
+    itemType="container"
+  />
 </template>
 
 <style scoped>

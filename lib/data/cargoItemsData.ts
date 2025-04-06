@@ -1,236 +1,174 @@
-// Define interfaces for cargo item data
+// Define the cargo item type
 export interface CargoItem {
-  id: string;               // Generated unique ID for item
-  instanceId: string;       // Reference to CusDec Instance_ID
-  itemNo: string;           // Item number in the declaration
-  originCountry: string;    // Country of origin
-  hsCode: string;           // Harmonized System code
-  itemDescription: string;  // Description of the item
-  cpc: string;              // Customs Procedure Code
-  npc: string;              // National Procedure Code
-  suppQty: number;          // Supplementary quantity
-  grossWeight: number;      // Gross weight in kg
-  netWeight: number;        // Net weight in kg
-  uom: string;              // Unit of measure
-  totalValue: number;       // Total value
-  invoiceValue: number;     // Invoice value
-  externalFreight: number;  // External freight cost
-  internalFreight: number;  // Internal freight cost
-  insuranceValue: number;   // Insurance value
-  otherCosts: number;       // Other costs
-  deductions: number;       // Deductions
+  id: string;             // Unique identifier for the cargo item
+  instanceId: string;     // Reference to the AnonymizedCusDecRecord.id
+  hsCode: string;         // Harmonized System code
+  description: string;    // Description of cargo
+  quantity: number;       // Quantity
+  unit: string;           // Unit of measurement
+  unitPrice: number;      // Unit price
+  totalValue: number;     // Total value
+  origin: string;         // Origin country
+  weight: number;         // Weight in kg
+  netWeight: number;      // Net weight in kg
 }
 
-// Connect cargo items to CusDec records
+// Sample cargo items data linked to CusDec records
 export const cargoItemsData: CargoItem[] = [
   {
-    id: "ITEM-7789156-1",
+    id: "ITEM-001",
     instanceId: "CUS-12712517",
-    itemNo: "1",
-    originCountry: "LK",
-    hsCode: "62052019",
-    itemDescription: "MENS WOVEN SHIRTS-98% COTTON 2% ELASTANE FABRIC STYLE NO:771296 PO NO:1603234",
-    cpc: "1378",
-    npc: "95G",
-    suppQty: 3720,
-    grossWeight: 1265,
-    netWeight: 1175,
-    uom: "NIU",
-    totalValue: 5575841,
-    invoiceValue: 5575841.04,
-    externalFreight: 0,
-    internalFreight: 0,
-    insuranceValue: 0,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "8471.30.00",
+    description: "Laptop computers, 14-inch display, i7 processor",
+    quantity: 250,
+    unit: "PCS",
+    unitPrice: 850.50,
+    totalValue: 212625.00,
+    origin: "IN",
+    weight: 675.00,
+    netWeight: 625.00
   },
   {
-    id: "ITEM-7789157-1",
+    id: "ITEM-002",
+    instanceId: "CUS-12712517",
+    hsCode: "8471.60.00",
+    description: "Computer keyboards, USB wired",
+    quantity: 500,
+    unit: "PCS",
+    unitPrice: 15.25,
+    totalValue: 7625.00,
+    origin: "IN",
+    weight: 225.00,
+    netWeight: 200.00
+  },
+  {
+    id: "ITEM-003",
     instanceId: "CUS-12724680",
-    itemNo: "1",
-    originCountry: "US",
-    hsCode: "82084000",
-    itemDescription: "BEDKNIFE",
-    cpc: "4000",
-    npc: "000",
-    suppQty: 3,
-    grossWeight: 3,
-    netWeight: 3,
-    uom: "KGM",
-    totalValue: 20912,
-    invoiceValue: 18383.69,
-    externalFreight: 2252.22,
-    internalFreight: 0,
-    insuranceValue: 276.42,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "8517.12.00",
+    description: "Mobile phones, smartphone, 6.5-inch display",
+    quantity: 1000,
+    unit: "PCS",
+    unitPrice: 450.75,
+    totalValue: 450750.00,
+    origin: "CN",
+    weight: 300.00,
+    netWeight: 250.00
   },
   {
-    id: "ITEM-7789157-2",
+    id: "ITEM-004",
     instanceId: "CUS-12724680",
-    itemNo: "2",
-    originCountry: "US",
-    hsCode: "84339010",
-    itemDescription: "LAWN MOVER PARTS: ES REEL, ROD SUPPORT, SKID BRACKET, PULL LINK ASM",
-    cpc: "4000",
-    npc: "000",
-    suppQty: 50,
-    grossWeight: 50,
-    netWeight: 50,
-    uom: "KGM",
-    totalValue: 422543,
-    invoiceValue: 371465.78,
-    externalFreight: 45503.72,
-    internalFreight: 0,
-    insuranceValue: 5573.12,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "8517.62.00",
+    description: "Wireless earbuds with charging case",
+    quantity: 1500,
+    unit: "PCS",
+    unitPrice: 35.20,
+    totalValue: 52800.00,
+    origin: "CN",
+    weight: 187.50,
+    netWeight: 150.00
   },
   {
-    id: "ITEM-7789158-1",
+    id: "ITEM-005",
     instanceId: "CUS-12736945",
-    itemNo: "1",
-    originCountry: "GB",
-    hsCode: "85171220",
-    itemDescription: "MOBILE PHONE",
-    cpc: "4000",
-    npc: "000",
-    suppQty: 1,
-    grossWeight: 0.5,
-    netWeight: 0.5,
-    uom: "NIU",
-    totalValue: 32876,
-    invoiceValue: 31666.9,
-    externalFreight: 733.62,
-    internalFreight: 0,
-    insuranceValue: 475,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "9018.90.00",
+    description: "Medical diagnostic equipment, portable ultrasound",
+    quantity: 50,
+    unit: "PCS",
+    unitPrice: 3500.00,
+    totalValue: 175000.00,
+    origin: "DE",
+    weight: 750.00,
+    netWeight: 600.00
   },
   {
-    id: "ITEM-7789159-1",
+    id: "ITEM-006",
     instanceId: "CUS-12748523",
-    itemNo: "1",
-    originCountry: "LK",
-    hsCode: "62034219",
-    itemDescription: "MENS WOVEN PANTS-98% COTTON 2% SPANDEX FABRIC STYLE NO:859004",
-    cpc: "1378",
-    npc: "95G",
-    suppQty: 176,
-    grossWeight: 105,
-    netWeight: 101,
-    uom: "NIU",
-    totalValue: 339861,
-    invoiceValue: 339860.79,
-    externalFreight: 0,
-    internalFreight: 0,
-    insuranceValue: 0,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "1704.90.00",
+    description: "Confectionery products, sugar-free candy assortment",
+    quantity: 5000,
+    unit: "KG",
+    unitPrice: 4.50,
+    totalValue: 22500.00,
+    origin: "AU",
+    weight: 5500.00,
+    netWeight: 5000.00
   },
   {
-    id: "ITEM-7789160-1",
+    id: "ITEM-007",
+    instanceId: "CUS-12748523",
+    hsCode: "1806.90.00",
+    description: "Chocolate confectionery, assorted gift boxes",
+    quantity: 2500,
+    unit: "KG",
+    unitPrice: 8.75,
+    totalValue: 21875.00,
+    origin: "AU",
+    weight: 2750.00,
+    netWeight: 2500.00
+  },
+  {
+    id: "ITEM-008",
+    instanceId: "CUS-12748523",
+    hsCode: "2106.90.00",
+    description: "Food preparations, protein bars",
+    quantity: 10000,
+    unit: "KG",
+    unitPrice: 3.25,
+    totalValue: 32500.00,
+    origin: "AU",
+    weight: 10500.00,
+    netWeight: 10000.00
+  },
+  {
+    id: "ITEM-009",
     instanceId: "CUS-12759682",
-    itemNo: "1",
-    originCountry: "CN",
-    hsCode: "54071000",
-    itemDescription: "92% NYLON 8% SPANDEX FABRIC 56\" 405.00 YDS",
-    cpc: "7800",
-    npc: "R00",
-    suppQty: 56.7,
-    grossWeight: 100,
-    netWeight: 56.7,
-    uom: "KGM",
-    totalValue: 384274,
-    invoiceValue: 275930.55,
-    externalFreight: 104205.39,
-    internalFreight: 0,
-    insuranceValue: 4138.47,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "7308.90.00",
+    description: "Steel structures, pre-fabricated building components",
+    quantity: 200,
+    unit: "TON",
+    unitPrice: 1500.00,
+    totalValue: 300000.00,
+    origin: "JP",
+    weight: 200000.00,
+    netWeight: 200000.00
   },
   {
-    id: "ITEM-7789161-1",
+    id: "ITEM-010",
+    instanceId: "CUS-12759682",
+    hsCode: "7318.15.00",
+    description: "Steel bolts and fasteners, assorted sizes",
+    quantity: 50000,
+    unit: "KG",
+    unitPrice: 3.50,
+    totalValue: 175000.00,
+    origin: "JP",
+    weight: 50500.00,
+    netWeight: 50000.00
+  },
+  {
+    id: "ITEM-011",
     instanceId: "CUS-12731557",
-    itemNo: "1",
-    originCountry: "IN",
-    hsCode: "52093900",
-    itemDescription: "96% COTTON 4% SPANDEX WOVEN FABRIC - 128 CM 1,069.55 YDS",
-    cpc: "7800",
-    npc: "R00",
-    suppQty: 172.91,
-    grossWeight: 177.56,
-    netWeight: 172.91,
-    uom: "KGM",
-    totalValue: 548325,
-    invoiceValue: 537152.59,
-    externalFreight: 3114.56,
-    internalFreight: 0,
-    insuranceValue: 8056.98,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "8437.10.00",
+    description: "Agricultural machinery, seed cleaning machines",
+    quantity: 20,
+    unit: "PCS",
+    unitPrice: 12500.00,
+    totalValue: 250000.00,
+    origin: "IN",
+    weight: 15000.00,
+    netWeight: 12000.00
   },
   {
-    id: "ITEM-7789162-1",
+    id: "ITEM-012",
     instanceId: "CUS-12732222",
-    itemNo: "1",
-    originCountry: "LK",
-    hsCode: "57039090",
-    itemDescription: "PVC BACKED COIR TUFTED MATS",
-    cpc: "1100",
-    npc: "000",
-    suppQty: 2698.14,
-    grossWeight: 19880,
-    netWeight: 17500,
-    uom: "MTK",
-    totalValue: 3708618,
-    invoiceValue: 3708618.39,
-    externalFreight: 0,
-    internalFreight: 0,
-    insuranceValue: 0,
-    otherCosts: 0,
-    deductions: 0
-  },
-  {
-    id: "ITEM-7789162-2",
-    instanceId: "CUS-12732222",
-    itemNo: "2",
-    originCountry: "LK",
-    hsCode: "57050000",
-    itemDescription: "RUBBER, COIR ROD COMBINE MAT",
-    cpc: "1100",
-    npc: "000",
-    suppQty: 344.25,
-    grossWeight: 3570,
-    netWeight: 3400,
-    uom: "MTK",
-    totalValue: 1168192,
-    invoiceValue: 1168191.79,
-    externalFreight: 0,
-    internalFreight: 0,
-    insuranceValue: 0,
-    otherCosts: 0,
-    deductions: 0
-  },
-  {
-    id: "ITEM-7789163-1",
-    instanceId: "CUS-12732575",
-    itemNo: "1",
-    originCountry: "LK",
-    hsCode: "57022010",
-    itemDescription: "COIR BRUSH MATS",
-    cpc: "1100",
-    npc: "000",
-    suppQty: 225,
-    grossWeight: 1350,
-    netWeight: 1300,
-    uom: "MTK",
-    totalValue: 565254,
-    invoiceValue: 565254.09,
-    externalFreight: 0,
-    internalFreight: 0,
-    insuranceValue: 0,
-    otherCosts: 0,
-    deductions: 0
+    hsCode: "8429.51.00",
+    description: "Construction machinery, front-end loaders",
+    quantity: 5,
+    unit: "PCS",
+    unitPrice: 75000.00,
+    totalValue: 375000.00,
+    origin: "IN",
+    weight: 35000.00,
+    netWeight: 30000.00
   }
 ]; 
