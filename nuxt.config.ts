@@ -32,6 +32,33 @@ export default defineNuxtConfig({
       orientation: 'portrait',
       scope: '/',
       start_url: '/',
+      id: '/',
+      categories: ['business', 'logistics', 'productivity'],
+      screenshots: [
+        {
+          src: '/screenshots/home.png',
+          sizes: '1280x720',
+          type: 'image/png',
+          platform: 'wide',
+          label: 'Home Screen'
+        }
+      ],
+      shortcuts: [
+        {
+          name: 'Track Container',
+          short_name: 'Container',
+          description: 'Track your container',
+          url: '/ContainerTracking',
+          icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+        },
+        {
+          name: 'Track CusDec',
+          short_name: 'CusDec',
+          description: 'Track your customs declaration',
+          url: '/CusDecTracking',
+          icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+        }
+      ],
       icons: [
         {
           src: 'icons/icon-72x72.png',
@@ -112,14 +139,43 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: '%s - Customs Documentation System',
-      title: 'Customs Documentation System',
+      titleTemplate: '%s - Cargo Tracking App',
+      title: 'Cargo Tracking System',
       meta: [
-        { name: 'description', content: 'Customs Documentation System for tracking containers and customs declarations' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' }
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
+        { name: 'format-detection', content: 'telephone=no' },
+        { name: 'description', content: 'A modern cargo tracking application for monitoring containers and customs declarations' },
+        { name: 'theme-color', content: '#ffffff' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        { name: 'apple-mobile-web-app-title', content: 'Cargo Tracking' },
+        { name: 'application-name', content: 'Cargo Tracking App' },
+        { name: 'msapplication-TileColor', content: '#ffffff' },
+        { name: 'msapplication-TileImage', content: '/icons/icon-144x144.png' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: 'Cargo Tracking App' },
+        { property: 'og:description', content: 'Track containers and customs declarations with ease' },
+        { property: 'og:image', content: '/icons/icon-512x512.png' },
+        { property: 'og:url', content: '/' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: 'Cargo Tracking App' },
+        { name: 'twitter:description', content: 'Track containers and customs declarations with ease' },
+        { name: 'twitter:image', content: '/icons/icon-512x512.png' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/icons/apple-icon-180.png' },
+        { rel: 'apple-touch-icon', sizes: '152x152', href: '/icons/icon-152x152.png' },
+        { rel: 'apple-touch-icon', sizes: '144x144', href: '/icons/icon-144x144.png' },
+        { rel: 'apple-touch-icon', sizes: '120x120', href: '/icons/apple-icon-180.png' },
+        { rel: 'apple-touch-icon', sizes: '114x114', href: '/icons/apple-icon-180.png' },
+        { rel: 'apple-touch-icon', sizes: '76x76', href: '/icons/icon-72x72.png' },
+        { rel: 'apple-touch-icon', sizes: '72x72', href: '/icons/icon-72x72.png' },
+        { rel: 'apple-touch-icon', sizes: '57x57', href: '/icons/icon-72x72.png' },
+        { rel: 'manifest', href: '/manifest.webmanifest' }
       ]
     }
   },

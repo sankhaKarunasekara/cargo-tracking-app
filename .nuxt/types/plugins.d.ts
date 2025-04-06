@@ -21,6 +21,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../pwa-icons-plugin")> &
   InjectionType<typeof import("../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_883c18b779f1611e35935ad0e7789ec0/node_modules/nuxt/dist/app/plugins/dev-server-logs.js")> &
   InjectionType<typeof import("../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_883c18b779f1611e35935ad0e7789ec0/node_modules/nuxt/dist/app/plugins/check-if-layout-used.js")> &
+  InjectionType<typeof import("../../plugins/app-loading.client")> &
   InjectionType<typeof import("../../plugins/pwa.client")> &
   InjectionType<typeof import("../../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_2f4ab5788443e8666131d84129784197/node_modules/@vite-pwa/nuxt/dist/runtime/plugins/pwa.client.js")>
 

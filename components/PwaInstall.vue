@@ -2,9 +2,9 @@
   <button 
     v-if="shouldShow"
     @click="installPwa" 
-    class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors duration-200 z-50 flex items-center space-x-2"
+    class="fixed z-50 flex items-center px-6 py-3 space-x-2 font-bold text-white transition-colors duration-200 transform -translate-x-1/2 bg-blue-600 rounded-full shadow-lg bottom-6 left-1/2 hover:bg-blue-700"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
       <path d="M10 2a2 2 0 00-2 2v4H4a2 2 0 100 4h4v4a2 2 0 104 0v-4h4a2 2 0 000-4h-4V4a2 2 0 00-2-2z" />
     </svg>
     <span>Install App</span>
