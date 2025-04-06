@@ -10,6 +10,7 @@ const props = defineProps<{
     date: string;
     description?: string;
     completed: boolean;
+    icon?: string;
   }>;
   showBackButton?: boolean;
   backLabel?: string;
@@ -23,10 +24,26 @@ const backLabel = props.backLabel ?? 'Back'
 const goBack = () => {
   router.back()
 }
+
+// Format date to be human readable
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.round(diffMs / 60000)
+  
+  if (diffMins < 60) {
+    return `${diffMins} minutes ago`
+  } else if (diffMins < 1440) {
+    return `${Math.floor(diffMins / 60)} hours ago`
+  } else {
+    return `${Math.floor(diffMins / 1440)} days ago`
+  }
+}
 </script>
 
 <template>
-  <div class="timeline-container bg-white">
+  <div class="timeline-container">
     <!-- Back button for mobile -->
     <div v-if="showBackButton" class="back-button-container">
       <button @click="goBack" class="back-button">
@@ -44,35 +61,22 @@ const goBack = () => {
         :key="index"
         class="timeline-item"
       >
-        <div class="flex items-start">
-          <div class="timeline-indicator-container">
-            <div 
-              class="timeline-indicator"
-              :class="item.completed ? 'bg-primary' : 'bg-secondary'"
-            ></div>
-            
-            <div 
-              v-if="index < statusItems.length - 1" 
-              class="timeline-connector"
-              :class="item.completed ? 'bg-primary' : 'bg-secondary'"
-            ></div>
+        <div class="timeline-line" v-if="index < statusItems.length - 1"></div>
+        
+        <div class="timeline-icon-container">
+          <div class="timeline-icon" :class="item.completed ? 'completed' : ''">
+            <span v-if="item.icon" v-html="item.icon"></span>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+              <path d="M7 12l5 5 5-5"></path>
+            </svg>
           </div>
-          
-          <div 
-            class="timeline-content"
-            :class="item.completed ? 'border-l-4 border-primary' : 'border-l-4 border-secondary'"
-          >
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <h3 class="font-medium text-gray-900">{{ item.title }}</h3>
-              <span class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-0">{{ item.date }}</span>
-            </div>
-            <p 
-              v-if="item.description" 
-              class="mt-1 text-sm text-gray-600"
-            >
-              {{ item.description }}
-            </p>
-          </div>
+        </div>
+        
+        <div class="timeline-content">
+          <h3 class="timeline-title">{{ item.title }}</h3>
+          <p class="timeline-date">{{ formatDate(item.date) }}</p>
+          <p v-if="item.description" class="timeline-description">{{ item.description }}</p>
         </div>
       </div>
     </div>
@@ -84,8 +88,11 @@ const goBack = () => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 1rem;
-  background-color: #fff;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  color: #1f2937;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .back-button-container {
@@ -104,7 +111,6 @@ const goBack = () => {
   font-size: 1rem;
   font-weight: 500;
   transition: background-color 0.2s, transform 0.1s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .back-button:hover {
@@ -119,70 +125,75 @@ const goBack = () => {
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
 }
 
 .timeline-item {
-  margin-bottom: 1.5rem;
-  width: 100%;
-}
-
-.timeline-indicator-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: 0.75rem;
-  min-width: 1rem;
+  position: relative;
+  padding-bottom: 2rem;
 }
 
-.timeline-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  z-index: 10;
+.timeline-item:last-child {
+  padding-bottom: 0;
 }
 
-.timeline-connector {
-  height: 2.5rem;
+.timeline-line {
+  position: absolute;
+  left: 9px;
+  top: 24px;
+  bottom: 0;
   width: 2px;
-  margin-top: 4px;
+  background-color: #e5e7eb;
+}
+
+.timeline-icon-container {
+  margin-right: 1rem;
+  z-index: 1;
+}
+
+.timeline-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.timeline-icon.completed {
+  background-color: #2563eb;
+  color: #ffffff;
 }
 
 .timeline-content {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 0.375rem;
-  background-color: #f9fafb;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.bg-primary {
-  background-color: #2563eb;
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
 }
 
-.bg-secondary {
-  background-color: #cbd5e1;
+.timeline-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
 }
 
-.border-primary {
-  border-color: #2563eb;
-}
-
-.border-secondary {
-  border-color: #cbd5e1;
+.timeline-description {
+  font-size: 0.875rem;
+  color: #4b5563;
 }
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .timeline-container {
-    padding: 0.75rem;
-  }
-  
-  .timeline-content {
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .timeline-connector {
-    height: 2rem;
+    padding: 1rem;
   }
   
   .back-button {

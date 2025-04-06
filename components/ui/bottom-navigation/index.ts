@@ -12,7 +12,7 @@ const BottomNavigation = defineComponent({
   setup(props, { slots }) {
     return () => h('div', {
       class: cn(
-        'fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center justify-around py-2 z-40 shadow-md',
+        'fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 z-40 shadow-md',
         props.class
       )
     }, slots.default?.())
@@ -44,7 +44,7 @@ const BottomNavigationItem = defineComponent({
     return () => h('button', {
       class: cn(
         'flex flex-col items-center justify-center px-4 py-2 text-xs',
-        props.active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400',
+        props.active ? 'text-blue-600' : 'text-gray-500',
         props.class
       ),
       onClick: () => emit('click')

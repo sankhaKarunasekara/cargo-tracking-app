@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card/card.vue'
 import ButtonComponent from './ui/button/index'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 // Define the props
 interface CusDec {
@@ -10,6 +10,10 @@ interface CusDec {
   declarantCompany: string;
   consigneeCompany: string;
   status: string;
+  officeCode?: string;
+  channel?: 'red' | 'yellow' | 'green' | 'blue';
+  containerCount?: number;
+  date?: string;
 }
 
 interface Props {
@@ -26,18 +30,74 @@ const emit = defineEmits<{
 // Method to handle view details click
 const handleViewDetails = () => {
   emit('viewDetails', props.cusdec);
+  // Use simple navigation to avoid redirection issues
+  window.location.href = `/CusDecDetail/${props.cusdec.id}`;
 };
+
+// Get default office code if not provided
+const officeCode = computed(() => {
+  return props.cusdec.officeCode || 'CBHQ1';
+});
+
+// Get default channel if not provided
+const channel = computed(() => {
+  return props.cusdec.channel || 'green';
+});
+
+// Get default date if not provided
+const date = computed(() => {
+  return props.cusdec.date || '05/04/2024';
+});
+
+// Get container count with default
+const containerCount = computed(() => {
+  return props.cusdec.containerCount || 0;
+});
+
+// Get channel color based on channel value
+const getChannelColor = computed(() => {
+  switch (channel.value) {
+    case 'red':
+      return {
+        bg: 'bg-red-100',
+        text: 'text-red-700',
+        border: 'border-red-200'
+      }
+    case 'yellow':
+      return {
+        bg: 'bg-amber-100',
+        text: 'text-amber-700',
+        border: 'border-amber-200'
+      }
+    case 'green':
+      return {
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        border: 'border-green-200'
+      }
+    case 'blue':
+      return {
+        bg: 'bg-blue-100',
+        text: 'text-blue-700',
+        border: 'border-blue-200'
+      }
+    default:
+      return {
+        bg: 'bg-gray-100',
+        text: 'text-gray-700',
+        border: 'border-gray-200'
+      }
+  }
+});
 
 // Get status color based on status value
 const getStatusColor = () => {
   switch (props.cusdec.status.toLowerCase()) {
-    case 'submitted':
+    case 'waiting confirmation':
       return 'status-bg-submitted'
-    case 'review':
+    case 'processing':
       return 'status-bg-review'
-    case 'paid':
-      return 'status-bg-paid'
-    case 'paid invoice':
+    case 'exited':
       return 'status-bg-paid'
     case 'error':
     case 'cancelled':
@@ -51,125 +111,185 @@ const getStatusColor = () => {
 // Mock features for display (can be replaced with actual data)
 const features = {
   submission: true,
-  assessment: props.cusdec.status !== 'Submitted',
-  payment: ['Paid', 'Paid Invoice'].includes(props.cusdec.status),
-  release: props.cusdec.status === 'Paid Invoice'
+  assessment: props.cusdec.status !== 'Waiting Confirmation',
+  payment: ['Processing', 'Exited'].includes(props.cusdec.status),
+  release: props.cusdec.status === 'Exited'
 }
 </script>
 
 <template>
-  <Card class="mb-4 overflow-hidden transition-shadow duration-200 hover:shadow-md">
-    <div class="p-5">
-      <!-- Header with flag icon and status -->
-      <div class="flex items-start justify-between mb-4">
+  <Card class="mb-5 overflow-hidden transition-all duration-200 border border-gray-100 rounded-lg shadow-sm hover:shadow-md">
+    <!-- Card Header -->
+    <div class="p-6 pb-4">
+      <div class="flex items-start justify-between gap-4">
+        <!-- Left: Document icon and CusDec number -->
         <div class="flex items-start">
-          <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-3 rounded-full bg-blue-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" />
+          <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 rounded-md bg-blue-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ cusdec.number }}</h3>
-            <p class="mt-1 text-sm text-gray-600">{{ cusdec.declarantCompany }}</p>
+            <h3 class="text-base font-semibold text-gray-900">{{ cusdec.number }}</h3>
+            <div class="flex items-center mt-1 text-xs text-gray-500">
+              <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ officeCode }}</span>
+              <span class="mx-1.5">•</span>
+              <span>{{ date }}</span>
+            </div>
           </div>
         </div>
-
-        <div :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusColor()]">
+        
+        <!-- Right: Status badge -->
+        <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
           {{ cusdec.status }}
         </div>
       </div>
-
-      <!-- Description -->
-      <div class="mb-5">
-        <p class="text-sm leading-relaxed text-gray-700">
-          {{ cusdec.consigneeCompany }}, TIN Number: 234567890, Declaration Type: Standard
-        </p>
+    </div>
+    
+    <!-- Card Divider -->
+    <div class="h-px bg-gray-100"></div>
+    
+    <!-- Card Content -->
+    <div class="p-6 pt-4">
+      <!-- Channel and Container Stats -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <!-- Channel - shown only if not "Waiting Confirmation" -->
+        <div 
+          v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
+          :class="[
+            'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium',
+            getChannelColor.bg, 
+            getChannelColor.text
+          ]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
+            <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
+            <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
+          </svg>
+          Channel {{ channel.toUpperCase() }}
+        </div>
+        
+        <!-- Container Count -->
+        <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+          </svg>
+          {{ containerCount }} Container<span v-if="containerCount !== 1">s</span>
+        </div>
       </div>
-
-      <!-- Features -->
-      <div class="flex flex-wrap gap-3 mb-5">
-        <div class="flex items-center" :class="features.submission ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Submission</span>
+      
+      <!-- Company Info -->
+      <div class="space-y-2 text-sm">
+        <div class="flex">
+          <span class="w-20 text-gray-500">Consignee:</span>
+          <span class="font-medium text-gray-700">{{ cusdec.consigneeCompany }}</span>
         </div>
-
-        <div class="flex items-center" :class="features.assessment ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Assessment</span>
-        </div>
-
-        <div class="flex items-center" :class="features.payment ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Payment</span>
-        </div>
-
-        <div class="flex items-center" :class="features.release ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
-            <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
-          </svg>
-          <span class="text-sm">Release</span>
+        <div class="flex">
+          <span class="w-20 text-gray-500">Declarant:</span>
+          <span class="font-medium text-gray-700">{{ cusdec.declarantCompany }}</span>
         </div>
       </div>
     </div>
-
-    <!-- Action buttons in CardFooter - right aligned -->
-    <CardFooter class="px-5 pt-0 pb-5 flex justify-end gap-3">
-      <ButtonComponent 
-        variant="outline"
-        size="sm" 
-        @click="handleViewDetails"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg"
-          width="16" 
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mr-2"
+    
+    <!-- Card Footer -->
+    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+      <div class="flex flex-col items-center justify-end gap-2 sm:flex-row">
+        <button 
+          @click="handleViewDetails"
+          class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 sm:w-auto"
         >
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-        More Info
-      </ButtonComponent>
-      
-      <NuxtLink 
-        :to="`/StatusTimelinePage?type=cusdec&id=${cusdec.id}`"
-        class="inline-flex items-center px-3.5 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          stroke-width="2" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"
-          class="mr-2"
+          <svg 
+            xmlns="http://www.w3.org/2000/svg"
+            width="15" 
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mr-2"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          More Info
+        </button>
+        
+        <!-- Show Accept button when status is Waiting Confirmation, otherwise show View Status -->
+        <NuxtLink 
+          v-if="cusdec.status.toLowerCase() === 'waiting confirmation'"
+          :to="`/AcceptCusDec?id=${cusdec.id}`"
+          class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-md shadow-sm hover:bg-green-700 sm:w-auto"
         >
-          <line x1="12" y1="20" x2="12" y2="10"></line>
-          <line x1="18" y1="20" x2="18" y2="4"></line>
-          <line x1="6" y1="20" x2="6" y2="16"></line>
-        </svg>
-        View Status
-      </NuxtLink>
-    </CardFooter>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="15" 
+            height="15" 
+            viewBox="0 0 24 24" 
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mr-2"
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          Accept
+        </NuxtLink>
+        
+        <NuxtLink 
+          v-else
+          :to="`/StatusTimelinePage?type=cusdec&id=${cusdec.id}`"
+          class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 sm:w-auto"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="15" 
+            height="15" 
+            viewBox="0 0 24 24" 
+            fill="currentColor"
+            class="mr-2"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+          </svg>
+          View Status
+        </NuxtLink>
+      </div>
+    </div>
   </Card>
-</template> 
+</template>
+
+<style scoped>
+/* Add any additional styles here */
+.status-bg-submitted {
+  background-color: rgb(254, 243, 199);
+  color: rgb(133, 77, 14);
+}
+
+.status-bg-review {
+  background-color: rgb(224, 242, 254);
+  color: rgb(2, 132, 199);
+}
+
+.status-bg-paid {
+  background-color: rgb(220, 252, 231);
+  color: rgb(22, 163, 74);
+}
+
+.status-bg-error {
+  background-color: rgb(254, 226, 226);
+  color: rgb(220, 38, 38);
+}
+</style> 

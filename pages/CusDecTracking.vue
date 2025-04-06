@@ -25,15 +25,18 @@ type CusDec = {
   declarantCompany: string;
   consigneeCompany: string;
   status: string;
+  officeCode?: string;
+  channel?: 'red' | 'yellow' | 'green' | 'blue';
+  containerCount?: number;
+  date?: string;
 };
 
 // Status tabs
 const statusTabs = ref([
   { id: 'all', label: 'All', active: true },
-  { id: 'submitted', label: 'Submitted', active: false },
-  { id: 'review', label: 'Review', active: false },
-  { id: 'paid', label: 'Paid', active: false },
-  { id: 'paid_invoice', label: 'Paid Invoice', active: false }
+  { id: 'waiting_confirmation', label: 'Waiting Confirmation', active: false },
+  { id: 'processing', label: 'Processing', active: false },
+  { id: 'exited', label: 'Exited', active: false }
 ])
 
 // Active status filter
@@ -74,34 +77,50 @@ const filters = ref<Filter[]>([
 ])
 
 // Sample data for CusDec records
-const allCusDecs = ref([
+const allCusDecs = ref<CusDec[]>([
   {
-    id: '1',
-    number: 'TEST987',
-    declarantCompany: 'CDS Group',
-    consigneeCompany: 'ABC Group',
-    status: 'Paid'
+    id: '20231105789',
+    number: 'CBHQ1-I-15789', 
+    declarantCompany: 'Freight Solutions Lanka (Pvt) Ltd',
+    consigneeCompany: 'Ceylon Biscuits Limited',
+    status: 'Processing',
+    officeCode: 'CBHQ1',
+    channel: 'yellow',
+    containerCount: 2,
+    date: '12/04/2024'
   },
   {
-    id: '2',
-    number: 'TEST564',
-    declarantCompany: 'CDS Group',
-    consigneeCompany: 'ABC Group',
-    status: 'Review'
+    id: '20231104562',
+    number: 'CBHQ1-I-24562',
+    declarantCompany: 'Global Logistics Services',
+    consigneeCompany: 'Maliban Biscuit Manufactories (Pvt) Ltd',
+    status: 'Waiting Confirmation',
+    officeCode: 'KTIM2',
+    channel: 'red',
+    containerCount: 1,
+    date: '08/04/2024'
   },
   {
-    id: '3',
-    number: 'TEST345',
-    declarantCompany: 'XYZ Group',
-    consigneeCompany: 'DEF Group',
-    status: 'Submitted'
+    id: '20231104123',
+    number: 'CBHQ1-I-32123',
+    declarantCompany: 'Expeditors Lanka (Pvt) Ltd',
+    consigneeCompany: 'Unilever Sri Lanka Ltd',
+    status: 'Waiting Confirmation',
+    officeCode: 'CBHQ1',
+    channel: 'green',
+    containerCount: 3,
+    date: '05/04/2024'
   },
   {
-    id: '4',
-    number: 'TEST789',
-    declarantCompany: 'LMN Group',
-    consigneeCompany: 'PQR Group',
-    status: 'Paid Invoice'
+    id: '20231103891',
+    number: 'CBHQ1-I-41891',
+    declarantCompany: 'DHL Global Forwarding Lanka',
+    consigneeCompany: 'Nestle Lanka PLC',
+    status: 'Exited',
+    officeCode: 'KTIM3',
+    channel: 'blue',
+    containerCount: 5,
+    date: '01/04/2024'
   }
 ])
 
@@ -121,7 +140,7 @@ const cusDecDetails = ref({
 
 // Filter CusDecs based on filters and active status
 const filteredCusDecs = computed(() => {
-  return allCusDecs.value.filter(cusdec => {
+  let filtered = allCusDecs.value.filter(cusdec => {
     const numberFilter = filters.value.find(f => f.id === 'cusdecNumber')
     const declarantFilter = filters.value.find(f => f.id === 'declarantTIN')
     const consigneeFilter = filters.value.find(f => f.id === 'consigneeTIN')
@@ -140,6 +159,17 @@ const filteredCusDecs = computed(() => {
 
     return matchesNumber && matchesDeclarant && matchesConsignee && matchesStatus
   })
+
+  // Sort results to prioritize "Waiting Confirmation" items if in "All" tab
+  if (activeStatusFilter.value === 'all') {
+    filtered.sort((a, b) => {
+      if (a.status === 'Waiting Confirmation' && b.status !== 'Waiting Confirmation') return -1;
+      if (a.status !== 'Waiting Confirmation' && b.status === 'Waiting Confirmation') return 1;
+      return 0;
+    });
+  }
+  
+  return filtered;
 })
 
 // Pagination state
@@ -296,7 +326,6 @@ const router = useRouter()
             v-for="cusdec in paginatedCusDecs"
             :key="cusdec.id"
             :cusdec="cusdec"
-            @viewDetails="handleViewDetails"
           />
           
           <!-- Pagination -->
