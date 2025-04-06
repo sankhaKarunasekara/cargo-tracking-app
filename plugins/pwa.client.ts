@@ -1,5 +1,5 @@
 // plugins/pwa.client.ts
-import { defineNuxtPlugin } from 'nuxt/app'
+import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp: any) => {
   if (typeof window !== 'undefined') {
@@ -24,9 +24,9 @@ export default defineNuxtPlugin((nuxtApp: any) => {
   
   return {
     provide: {
-      pwa: {
+      pwaInstall: {
         // Method to show PWA install prompt
-        showPWAInstallPrompt: () => {
+        showPrompt: () => {
           if (typeof window !== 'undefined' && nuxtApp.payload.pwaInstallPrompt) {
             // @ts-ignore
             nuxtApp.payload.pwaInstallPrompt.prompt()

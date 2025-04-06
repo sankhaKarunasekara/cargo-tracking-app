@@ -10,20 +10,20 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useNuxtApp } from 'nuxt/app'
+import { useNuxtApp } from '#app'
 
 const nuxtApp = useNuxtApp()
 const shouldShow = ref(false)
 
 interface NuxtAppWithPwa {
-  $pwa: {
-    showPWAInstallPrompt: () => void
+  $pwaInstall: {
+    showPrompt: () => void
   }
 }
 
 const installPwa = () => {
   // @ts-ignore - We know this exists because our plugin provides it
-  (nuxtApp as unknown as NuxtAppWithPwa).$pwa.showPWAInstallPrompt()
+  (nuxtApp as unknown as NuxtAppWithPwa).$pwaInstall.showPrompt()
 }
 
 onMounted(() => {
