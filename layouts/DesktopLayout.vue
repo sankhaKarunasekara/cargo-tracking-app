@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="flex flex-col h-full bg-gray-50">
     <!-- Desktop Header -->
     <header class="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
       <div class="container flex items-center justify-between h-16 px-6 mx-auto">
@@ -39,12 +39,20 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container min-h-screen px-6 py-6 mx-auto">
-      <slot />
+    <main class="flex-1 overflow-y-auto custom-scrollbar">
+      <div class="container px-6 py-6 mx-auto">
+        <slot />
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 // Desktop layout specific logic can go here
-</script> 
+</script>
+
+<style scoped>
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+</style> 

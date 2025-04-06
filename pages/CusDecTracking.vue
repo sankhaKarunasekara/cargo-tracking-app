@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, provide, onUnmounted } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import CusDecCard from '../components/CusDecCard.vue'
 import { Pagination } from '../components/ui/pagination'
@@ -104,12 +104,12 @@ const showSidebar = ref(false)
 // Set sidebar visibility based on screen size
 onMounted(() => {
   // Check if screen is larger than mobile (md breakpoint)
-  const isDesktop = window.innerWidth >= 768
+  const isDesktop = window.innerWidth >= 1200
   showSidebar.value = isDesktop
   
   // Add resize listener to update sidebar visibility
   window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
+    if (window.innerWidth >= 1200) {
       showSidebar.value = true
     } else {
       showSidebar.value = false
@@ -313,31 +313,24 @@ const formatDate = (dateString: string) => {
     day: 'numeric'
   });
 };
+
+// Provide the toggleSidebar function to the navbar
+provide('toggleFilters', toggleSidebar)
+
+// Listen for toggle-filters event from navbar
+onMounted(() => {
+  document.addEventListener('toggle-filters', () => toggleSidebar())
+})
+
+// Cleanup event listener
+onUnmounted(() => {
+  document.removeEventListener('toggle-filters', () => toggleSidebar())
+})
 </script>
 
 <template>
   <div class="min-h-screen pb-20 bg-gray-50">
-    <!-- Header with sticky position -->
-    <div class="sticky top-0 z-10 bg-white shadow-sm">
-      <div class="container mx-auto">
-        <div class="flex items-center justify-between px-4 py-3">
-          <h1 class="text-xl font-bold">CusDec Status</h1>
-          <!-- Filter toggle button -->
-          <div class="flex items-center space-x-2">
-            <button 
-              @click="toggleSidebar" 
-              class="flex items-center justify-center p-2 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="container px-4 mx-auto">
+    <div class="container px-0 mx-auto">
       <div class="flex flex-col mt-4 md:flex-row">
         <!-- Side Panel with filters (always visible on desktop, togglable on mobile) -->
         <div 
@@ -450,13 +443,13 @@ const formatDate = (dateString: string) => {
         <div class="flex-1">
           <!-- Status Tabs - now aligned with card content, not full width -->
           <div class="p-2 mb-4 overflow-x-auto bg-white rounded-lg shadow-sm">
-            <div class="flex space-x-1 min-w-max">
+            <div class="flex space-x-1">
               <button 
                 v-for="tab in statusTabs" 
                 :key="tab.id"
                 @click="setActiveStatus(tab.id)"
                 :class="[
-                  'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                  'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
                   tab.active 
                     ? 'bg-blue-50 text-blue-600' 
                     : 'text-gray-600 hover:bg-gray-50'
@@ -486,31 +479,18 @@ const formatDate = (dateString: string) => {
             
             <div v-else>
               <!-- Results count indicator -->
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex flex-col mb-4 space-y-2 md:flex-row md:items-center md:justify-between">
                 <p class="text-sm text-gray-500">Found {{ filteredCusDecs.length }} CusDec records</p>
                 
-                <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-500">View:</span>
-                  <button class="p-1.5 bg-blue-50 text-blue-600 rounded">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                    </svg>
-                  </button>
-                  <button class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                  </button>
-                </div>
               </div>
               
               <!-- Card-based layout for all screen sizes -->
-              <div class="space-y-4">
+              <div class="w-full space-y-4">
                 <CusDecCard
                   v-for="cusdec in paginatedCusDecs"
                   :key="cusdec.id"
                   :cusdec="cusdec"
-                  @view-details="handleViewDetails"
+                  @view-details="handleViewDetails" 
                   class="mb-4" 
                 />
                 

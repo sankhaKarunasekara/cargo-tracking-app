@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, provide, onUnmounted } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
 import Pagination from '../components/ui/pagination'
@@ -222,36 +222,33 @@ const handleReset = () => {
   currentPage.value = 1
   displayedItemsCount.value = itemsPerPage
 }
+
+// Provide the toggleFilters function to the navbar
+provide('toggleFilters', toggleFilters)
+
+// Alternatively, if you have a more sophisticated event bus system:
+onMounted(() => {
+  document.addEventListener('toggle-filters', toggleFilters)
+})
+
+// Add cleanup if necessary
+onUnmounted(() => {
+  document.removeEventListener('toggle-filters', toggleFilters)
+})
 </script>
 
 <template>
-  <div class="pb-20 bg-gray-50 min-h-screen">
-    <div class="bg-white shadow-sm sticky top-0 z-10">
-      <div class="container mx-auto">
-        <div class="flex items-center justify-between px-4 py-3">
-          <h1 class="text-xl font-bold">Container Tracking</h1>
-          <button 
-            @click="toggleFilters" 
-            class="flex items-center justify-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <div class="container mx-auto px-4">
+  <div class="min-h-screen pb-20 bg-gray-50">
+    <div class="container px-0 mx-auto">
       <!-- Status Tabs -->
-      <div class="bg-white rounded-lg shadow-sm mt-4 p-2 overflow-x-auto">
-        <div class="flex space-x-1 min-w-max">
+      <div class="p-2 mt-4 overflow-x-auto bg-white rounded-lg shadow-sm">
+        <div class="flex space-x-1">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'
@@ -285,7 +282,7 @@ const handleReset = () => {
       
       <div class="mt-4">
         <!-- Empty state -->
-        <div v-if="filteredContainers.length === 0" class="bg-white rounded-lg shadow-sm py-8 text-center text-gray-500">
+        <div v-if="filteredContainers.length === 0" class="py-8 text-center text-gray-500 bg-white rounded-lg shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-400">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -293,7 +290,7 @@ const handleReset = () => {
           <p>No containers found matching your filters</p>
           <button 
             @click="handleReset" 
-            class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            class="px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
           >
             Reset Filters
           </button>
@@ -301,31 +298,19 @@ const handleReset = () => {
         
         <div v-else>
           <!-- Results count -->
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-col mb-4 space-y-2 md:flex-row md:items-center md:justify-between">
             <p class="text-sm text-gray-500">Found {{ filteredContainers.length }} containers</p>
-            
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-500">View:</span>
-              <button class="p-1.5 bg-blue-50 text-blue-600 rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                </svg>
-              </button>
-              <button class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-            </div>
           </div>
           
           <!-- Container cards -->
-          <ContainerCard
-            v-for="container in paginatedContainers"
-            :key="container.id"
-            :container="container"
-            @viewDetails="handleViewDetails"
-          />
+          <div class="w-full space-y-4">
+            <ContainerCard
+              v-for="container in paginatedContainers"
+              :key="container.id"
+              :container="container"
+              @viewDetails="handleViewDetails"
+            />
+          </div>
           
           <!-- Pagination for desktop, Load More for mobile -->
           <div class="flex justify-center mt-6">

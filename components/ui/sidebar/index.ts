@@ -113,7 +113,7 @@ export const Sidebar = defineComponent({
       'data-open': open.value,
       'data-collapsible': collapsible.value,
       class: cn(
-        'group flex h-full flex-col overflow-hidden bg-sidebar-background text-sidebar-foreground',
+        'group flex flex-col h-full min-h-screen bg-sidebar-background text-sidebar-foreground',
         'border-r border-sidebar-border data-[open=false]:w-0',
         collapsible.value === 'icon' ? 'data-[collapsible=icon]:w-16 data-[collapsible=icon]:data-[open=true]:w-64 transition-[width] duration-300' : '',
         collapsible.value === 'collapsed' ? 'data-[collapsible=collapsed]:w-16 data-[collapsible=collapsed]:data-[open=true]:w-64 transition-[width] duration-300' : '',
@@ -154,7 +154,7 @@ export const SidebarContent = defineComponent({
   setup(props, { slots }) {
     return () => h('div', {
       class: cn(
-        'flex-1 overflow-auto',
+        'flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent',
         props.className
       )
     }, slots.default?.())

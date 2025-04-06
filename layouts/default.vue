@@ -1,29 +1,82 @@
 <script setup lang="ts">
-import { SidebarProvider } from '../components/ui/sidebar'
+import { ref, onMounted, onUnmounted, inject } from 'vue'
 import Navbar from '../components/Navbar.vue'
 import AppSidebar from '../components/AppSidebar.vue'
+import { SidebarProvider, useSidebar } from '../components/ui/sidebar'
+
+// Simple device detection
+const isMobile = ref(false)
+const showDesktopSidebar = ref(true)
+
+// Check if the device is mobile
+const checkDevice = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+// Handle toggle filters event from Navbar
+const handleToggleFilters = () => {
+  // Create a custom event to notify pages
+  const event = new CustomEvent('toggle-filters')
+  document.dispatchEvent(event)
+}
+
+// Toggle desktop sidebar
+const toggleDesktopSidebar = () => {
+  showDesktopSidebar.value = !showDesktopSidebar.value
+}
+
+onMounted(() => {
+  checkDevice()
+  window.addEventListener('resize', checkDevice)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkDevice)
+})
 </script>
 
 <template>
-  <SidebarProvider>
-    <div class="flex h-screen overflow-hidden bg-gray-50">
-      <!-- Sidebar -->
-      <AppSidebar />
+  <div class="flex flex-col h-screen overflow-hidden">
+    <SidebarProvider>
+      <Navbar @toggle-filters="handleToggleFilters" />
       
-      <!-- Main content -->
-      <div class="flex flex-col flex-1 w-full overflow-hidden">
-        <!-- Navbar -->
-        <Navbar />
+      <div class="flex flex-1 overflow-hidden relative">
+        <!-- Sidebar toggle button for desktop when sidebar is hidden -->
+        <button
+          v-if="!isMobile && !showDesktopSidebar"
+          @click="toggleDesktopSidebar"
+          class="absolute left-0 top-4 z-20 bg-white shadow-md rounded-r-lg p-2"
+          aria-label="Show sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+            <path d="M8 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h3"></path>
+            <path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path>
+            <path d="M12 8 8 12l4 4"></path>
+            <path d="m16 12-4 4 4 4"></path>
+          </svg>
+        </button>
         
-        <!-- Page content -->
-        <main class="flex-1 overflow-auto">
-          <div class="container p-4 mx-auto">
-            <slot />
-          </div>
+        <!-- Desktop sidebar -->
+        <AppSidebar v-if="!isMobile && showDesktopSidebar" class="relative">
+          <!-- Hide sidebar button -->
+          <button
+            @click="toggleDesktopSidebar"
+            class="absolute right-0 top-4 z-20 bg-white shadow-md rounded-l-lg p-2 -mr-3"
+            aria-label="Hide sidebar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+              <path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11"></path>
+              <path d="m10 17-5-5 5-5"></path>
+            </svg>
+          </button>
+        </AppSidebar>
+        
+        <main class="flex-1 min-w-0 h-full overflow-y-auto pb-16 md:pb-0">
+          <slot />
         </main>
       </div>
-    </div>
-  </SidebarProvider>
+    </SidebarProvider>
+  </div>
 </template>
 
 <style>

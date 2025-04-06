@@ -112,6 +112,7 @@ declare global {
   const useModel: typeof import('vue')['useModel']
   const useNuxtApp: typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']
   const useNuxtData: typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']
+  const useNuxtDevTools: typeof import('../../node_modules/.pnpm/@nuxt+devtools@2.3.2_vite@6_c495b61b2899243abe5dae419456eef5/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']
   const usePreviewMode: typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']
   const useRequestEvent: typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/ssr')['useRequestEvent']
   const useRequestFetch: typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/ssr')['useRequestFetch']
@@ -291,6 +292,7 @@ declare module 'vue' {
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
+    readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxt+devtools@2.3.2_vite@6_c495b61b2899243abe5dae419456eef5/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly usePreviewMode: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']>
     readonly useRequestEvent: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/ssr')['useRequestEvent']>
     readonly useRequestFetch: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/app/composables/ssr')['useRequestFetch']>

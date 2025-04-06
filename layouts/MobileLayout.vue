@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="flex flex-col h-full bg-gray-50">
     <!-- Mobile Header with conditional back button for detail pages -->
     <header class="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
       <div class="flex items-center justify-between h-14 px-4">
@@ -39,12 +39,12 @@
     </header>
 
     <!-- Main Content -->
-    <main class="px-4 py-4">
+    <main class="flex-1 px-4 py-4 overflow-y-auto custom-scrollbar">
       <slot />
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-gray-200">
+    <nav class="sticky bottom-0 z-10 bg-white border-t border-gray-200">
       <div class="grid grid-cols-4 h-16">
         <NuxtLink to="/" class="flex flex-col items-center justify-center text-gray-500 hover:text-blue-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,9 +75,6 @@
         </NuxtLink>
       </div>
     </nav>
-
-    <!-- Add bottom padding to account for fixed nav -->
-    <div class="h-16"></div>
   </div>
 </template>
 
@@ -118,4 +115,10 @@ const pageTitle = computed(() => {
 const goBack = () => {
   router.back();
 };
-</script> 
+</script>
+
+<style scoped>
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+</style> 
