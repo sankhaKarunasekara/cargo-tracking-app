@@ -102,9 +102,11 @@ export default defineNuxtConfig({
     },
     devOptions: {
       enabled: true,
+      type: 'module',
       suppressWarnings: true,
       navigateFallbackAllowlist: [/^\/$/],
-      type: 'module'
+      vueMajorVersion: 3,
+      renderManifestInDevServer: true
     }
   },
 

@@ -4,10 +4,28 @@ import Navbar from '../components/Navbar.vue'
 import AppSidebar from '../components/AppSidebar.vue'
 import PwaInstall from '../components/PwaInstall.vue'
 import { SidebarProvider, useSidebar } from '../components/ui/sidebar'
+import { useNuxtApp } from '#app'
 
 // Simple device detection
 const isMobile = ref(false)
 const showDesktopSidebar = ref(true)
+const nuxtApp = useNuxtApp()
+
+// Debug function to manually trigger PWA installation
+const debugTriggerPwaInstall = () => {
+  console.log('Debug: Manual trigger of PWA install')
+  try {
+    // @ts-ignore
+    if (nuxtApp.$pwaInstall && nuxtApp.$pwaInstall.showPrompt) {
+      // @ts-ignore
+      nuxtApp.$pwaInstall.showPrompt()
+    } else {
+      console.log('Debug: $pwaInstall.showPrompt not available')
+    }
+  } catch (error) {
+    console.error('Error triggering PWA install', error)
+  }
+}
 
 // Check if the device is mobile
 const checkDevice = () => {
@@ -68,6 +86,14 @@ onUnmounted(() => {
         <main class="h-[calc(100vh-64px)] overflow-y-auto pb-16 md:pb-0">
           <slot />
         </main>
+        
+        <!-- Debug button for PWA install -->
+        <button 
+          @click="debugTriggerPwaInstall" 
+          class="fixed top-20 right-4 bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2 rounded z-50"
+        >
+          Debug: Install PWA
+        </button>
       </div>
       
       <!-- PWA Install Button -->
