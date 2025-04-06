@@ -38,6 +38,7 @@ const emit = defineEmits(['update:isOpen'])
 const isSheetOpen = ref(props.isOpen)
 const isLoading = ref(true)
 const activeTab = ref('general')
+const showRejectDisclaimer = ref(false)
 
 // Data objects
 const cusDecData = ref<AnonymizedCusDecRecord | null>(null)
@@ -72,6 +73,16 @@ const sheetTitle = computed(() => {
   } else {
     return containerData.value ? `Container ${containerData.value.number}` : 'Container Details'
   }
+})
+
+// Compute if the item is waiting confirmation
+const isWaitingConfirmation = computed(() => {
+  if (props.itemType === 'cusdec' && cusDecData.value) {
+    return cusDecData.value.status.toLowerCase() === 'waiting confirmation'
+  } else if (props.itemType === 'container' && containerData.value) {
+    return containerData.value.status.toLowerCase() === 'waiting confirmation'
+  }
+  return false
 })
 
 // Load the appropriate data based on itemType and itemId
@@ -121,6 +132,41 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
+// Handle acknowledge action
+const handleAcknowledge = () => {
+  // In a real app, this would make an API call to update the status
+  console.log('Acknowledging item', props.itemId)
+  if (props.itemType === 'cusdec' && cusDecData.value) {
+    cusDecData.value.status = 'Processing'
+  } else if (props.itemType === 'container' && containerData.value) {
+    containerData.value.status = 'Processing'
+  }
+  
+  // Close the sheet
+  setTimeout(() => {
+    isSheetOpen.value = false
+  }, 500)
+}
+
+// Handle reject action
+const handleReject = () => {
+  // In a real app, this would make an API call to report unauthorized use
+  console.log('Rejecting item and reporting unauthorized use', props.itemId)
+  showRejectDisclaimer.value = false
+  
+  // Update status to rejected/detained
+  if (props.itemType === 'cusdec' && cusDecData.value) {
+    cusDecData.value.status = 'Rejected'
+  } else if (props.itemType === 'container' && containerData.value) {
+    containerData.value.status = 'Detained'
+  }
+  
+  // Close the sheet
+  setTimeout(() => {
+    isSheetOpen.value = false
+  }, 500)
+}
+
 // Load data on mount
 onMounted(() => {
   if (props.isOpen) {
@@ -131,7 +177,7 @@ onMounted(() => {
 
 <template>
   <Sheet v-model:open="isSheetOpen">
-    <SheetContent class="sm:max-w-xl w-full overflow-y-auto" side="right">
+    <SheetContent class="w-full overflow-y-auto sm:max-w-xl" side="right">
       <SheetHeader class="pb-4 border-b">
         <SheetTitle>{{ sheetTitle }}</SheetTitle>
         <SheetDescription>
@@ -156,13 +202,77 @@ onMounted(() => {
       
       <!-- Loading State -->
       <div v-if="isLoading" class="flex items-center justify-center h-80">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+        <div class="w-12 h-12 border-b-2 border-blue-700 rounded-full animate-spin"></div>
       </div>
       
       <!-- Content when loaded -->
       <div v-else class="py-6">
+        <!-- Waiting Confirmation Action Buttons -->
+        <div v-if="isWaitingConfirmation" class="mb-6">
+          <div class="p-4 mb-4 border rounded-lg bg-amber-50 border-amber-200">
+            <h3 class="mb-1 text-sm font-medium text-amber-800">Verification Required</h3>
+            <p class="text-xs text-amber-700">
+              This item requires your verification. Please confirm if this is a legitimate document related to your company.
+            </p>
+          </div>
+          
+          <div class="flex flex-col gap-3">
+            <button 
+              @click="handleAcknowledge" 
+              class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+              Acknowledge as Valid
+            </button>
+            
+            <button 
+              @click="showRejectDisclaimer = true" 
+              class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+              Reject & Alert Customs
+            </button>
+          </div>
+          
+          <!-- Reject Disclaimer Modal -->
+          <div v-if="showRejectDisclaimer" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="max-w-md p-6 mx-4 bg-white rounded-lg">
+              <h3 class="mb-2 text-lg font-semibold text-gray-900">Confirmation Required</h3>
+              <div class="p-4 mb-4 border border-red-200 rounded-lg bg-red-50">
+                <p class="mb-2 text-sm font-medium text-red-700">DISCLAIMER</p>
+                <p class="text-sm text-red-700">
+                  By proceeding, you are confirming that this document was not launched by you or your company without your authorization.
+                </p>
+                <p class="mt-2 text-sm font-medium text-red-700">
+                  This will trigger an investigation by Customs authorities.
+                </p>
+              </div>
+              <div class="flex justify-end gap-3 mt-4">
+                <button 
+                  @click="showRejectDisclaimer = false" 
+                  class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  @click="handleReject" 
+                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <!-- Tabs navigation -->
-        <div class="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500 dark:bg-gray-800 dark:text-gray-400 mb-6 w-full grid grid-cols-3">
+        <div class="inline-flex grid items-center justify-center w-full h-10 grid-cols-3 p-1 mb-6 text-gray-500 bg-gray-100 rounded-md dark:bg-gray-800 dark:text-gray-400">
           <button 
             type="button"
             @click="activeTab = 'general'"
@@ -218,7 +328,7 @@ onMounted(() => {
             CusDec
           </button>
         </div>
-          
+        
         <!-- General Tab -->
         <div v-if="activeTab === 'general'">
           <!-- CusDec General Information -->
@@ -236,7 +346,7 @@ onMounted(() => {
               </div>
             </div>
             
-            <div class="bg-gray-50 p-4 rounded-lg space-y-3">
+            <div class="p-4 space-y-3 rounded-lg bg-gray-50">
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <p class="text-sm font-medium text-gray-500">Registration Date</p>
@@ -332,7 +442,7 @@ onMounted(() => {
               </div>
             </div>
             
-            <div class="bg-gray-50 p-4 rounded-lg space-y-3">
+            <div class="p-4 space-y-3 rounded-lg bg-gray-50">
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <p class="text-sm font-medium text-gray-500">Size</p>
@@ -374,13 +484,13 @@ onMounted(() => {
         <!-- Cargo Items Tab -->
         <div v-if="activeTab === 'cargo'">
           <div v-if="cargoItems.length > 0" class="space-y-4">
-            <div v-for="(item, index) in cargoItems" :key="index" class="p-4 bg-gray-50 rounded-lg">
+            <div v-for="(item, index) in cargoItems" :key="index" class="p-4 rounded-lg bg-gray-50">
               <div class="flex justify-between">
                 <h4 class="text-sm font-medium">Item #{{ index + 1 }}</h4>
                 <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">{{ item.hsCode }}</span>
               </div>
-              <p class="text-sm mt-2">{{ item.description }}</p>
-              <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+              <p class="mt-2 text-sm">{{ item.description }}</p>
+              <div class="grid grid-cols-3 gap-2 mt-3 text-xs">
                 <div>
                   <p class="text-gray-500">Quantity</p>
                   <p class="font-medium">{{ item.quantity }} {{ item.unit }}</p>
@@ -415,7 +525,7 @@ onMounted(() => {
                   'bg-amber-100 text-amber-700': container.status === 'Officer Checked' || container.status === 'Waiting Confirmation'
                 }">{{ container.status }}</span>
               </div>
-              <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
                 <div>
                   <p class="text-gray-500">Size & Type</p>
                   <p class="font-medium">{{ container.size }} {{ container.type }}</p>
@@ -443,7 +553,7 @@ onMounted(() => {
         <!-- Shipping Tab -->
         <div v-if="activeTab === 'shipping' && props.itemType === 'container' && containerData">
           <div class="space-y-6">
-            <div class="bg-gray-50 p-4 rounded-lg space-y-3">
+            <div class="p-4 space-y-3 rounded-lg bg-gray-50">
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <p class="text-sm font-medium text-gray-500">Shipping Line</p>
