@@ -17,8 +17,21 @@ export default defineNuxtConfig({
 
   // @ts-ignore - shadcn-nuxt adds this property but TypeScript doesn't know about it
   shadcn: {
-    prefix: '',
     componentDir: './components/ui'
+  },
+
+  app: {
+    head: {
+      titleTemplate: '%s - Customs Documentation System',
+      title: 'Customs Documentation System',
+      meta: [
+        { name: 'description', content: 'Customs Documentation System for tracking containers and customs declarations' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' }
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
   },
 
   compatibilityDate: '2025-04-05'

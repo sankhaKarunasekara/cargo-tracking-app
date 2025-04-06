@@ -9,8 +9,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import StatusTimelineSheet from '../components/StatusTimelineSheet.vue'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
-import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
-import { getAllCusDecData, filterCusDecs, calculateCusDecStats } from '../lib/data/cusDecUtils'
+import { 
+  getAllCusDecData, 
+  filterCusDecs, 
+  calculateCusDecStats,
+  AnonymizedCusDecRecord
+} from '../lib/data'
+
+// Define page metadata
+definePageMeta({
+  title: 'CusDec Tracking',
+  description: 'Track and manage your customs declarations with real-time status updates'
+})
 
 // Get window size and mobile status
 const { isMobile } = useWindowSize()
@@ -299,7 +309,7 @@ const handleCloseDetails = () => {
 // Handle view timeline
 const handleViewTimeline = (cusdec: AnonymizedCusDecRecord) => {
   selectedTimelineItem.value = {
-    id: cusdec.cusdecNumber,
+    id: cusdec.id,
     type: 'cusdec',
     status: cusdec.status
   }
@@ -491,9 +501,9 @@ const formatDate = (dateString: string) => {
       <div class="flex flex-col md:flex-row md:space-x-5">
         <!-- Side Panel with filters (only visible on desktop) -->
         <div 
-          class="hidden md:block md:w-80 bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-5 rounded-lg"
+          class="hidden md:block md:w-80 xl:w-80 lg:w-64 bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-5 rounded-lg transition-all duration-200"
         >
-          <div class="p-5">
+          <div class="p-5 lg:p-4">
             <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>
             
             <!-- Date Range Picker -->

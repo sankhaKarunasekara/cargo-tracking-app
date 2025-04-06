@@ -1,4 +1,8 @@
 <script setup>
+definePageMeta({
+  title: 'Home',
+  description: 'Customs Documentation System for managing containers and customs declarations'
+})
 </script>
 
 <template>

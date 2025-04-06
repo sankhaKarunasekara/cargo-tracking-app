@@ -1026,7 +1026,7 @@ const _dARq5YSigOVwhtKMcozJIMT0ZbPhpd3Z19Re3tbSkWk = (function(nitro) {
 
 const rootDir = "F:/Projects/cargo-tracking-app";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"description","content":"Customs Documentation System for tracking containers and customs declarations"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}],"link":[{"rel":"icon","type":"image/x-icon","href":"/favicon.ico"}],"style":[],"script":[],"noscript":[],"titleTemplate":"%s - Customs Documentation System","title":"Customs Documentation System"};
 
 const appRootTag = "div";
 

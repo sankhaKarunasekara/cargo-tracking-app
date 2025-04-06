@@ -18,6 +18,63 @@ export interface AnonymizedCusDecRecord {
   incoterm: string;             // Original INCOTERM
 }
 
+export interface AnonymizedContainer {
+  id: string;                   // Container ID
+  number: string;               // Container number
+  cusdecId: string;             // Reference to the AnonymizedCusDecRecord.id
+  size: string;                 // Size (e.g., 20ft, 40ft)
+  type: string;                 // Container type
+  status: string;               // Container status
+  location: string;             // Current location
+  shippingLine: string;         // Shipping line
+  vesselName: string;           // Name of vessel
+  voyage: string;               // Voyage number
+  arrivalDate: string;          // Arrival date
+  lastUpdated: string;          // Last status update
+}
+
+export interface CusDecItem {
+  id: string;                   // Item ID
+  instanceId: string;           // Reference to AnonymizedCusDecRecord.id
+  itemNo: string;               // Item number
+  originCountry: string;        // Country of origin
+  hsCode: string;               // HS Code
+  description: string;          // Item description
+  cpc: string;                  // Customs Procedure Code
+  npc: string;                  // National Procedure Code
+  quantity: number;             // Quantity
+  grossWeight: number;          // Gross weight
+  netWeight: number;            // Net weight
+  uom: string;                  // Unit of measure
+  totalValue: number;           // Total value
+  invoiceValue: number;         // Invoice value
+}
+
+export interface ContainerPassRecord {
+  id: string;                   // Pass ID
+  instanceId: string;           // Container instance ID
+  cusdecId: string;             // Reference to AnonymizedCusDecRecord.id
+  passDate: string;             // Pass date
+  destination: string;          // Destination
+  containerNumber: string;      // Container number
+  isScanned: boolean;           // Whether container is scanned
+}
+
+export interface ContainerTrackingRecord {
+  id: string;                   // Tracking ID
+  instanceId: string;           // Container instance ID
+  cusdecId: string;             // Reference to AnonymizedCusDecRecord.id
+  passDate: string;             // Pass date
+  destination: string;          // Destination
+  containerNumber: string;      // Container number
+  isScanned: boolean;           // Whether container is scanned
+  docId: string;                // Document ID
+  docVersion: number;           // Document version
+  operationName: string;        // Operation name
+  operationDateTime: string;    // Operation date and time
+  binderId: string;             // Binder ID
+}
+
 // Anonymized dataset based on the original data
 export const anonymizedCusDecData: AnonymizedCusDecRecord[] = [
   {
@@ -37,6 +94,78 @@ export const anonymizedCusDecData: AnonymizedCusDecRecord[] = [
     exporterName: "Chem Solutions Ltd.",
     originCountry: "IN",
     incoterm: "CFR"
+  },
+  {
+    id: "CUS-12724680",
+    declarantTIN: "D-1042391864",
+    declarantName: "Omega Logistics Co.",
+    consigneeTIN: "C-2041378542",
+    consigneeName: "Tech Innovations Ltd.",
+    cusdecNumber: "CBHQ1-I-1565",
+    status: "Released",
+    officeCode: "CBHQ1",
+    channel: "Green",
+    containerCount: 2,
+    regDate: "2025-01-04",
+    releaseDate: "2025-01-05",
+    invoiceValue: 12457890.75,
+    exporterName: "Electronics Global Corp.",
+    originCountry: "CN",
+    incoterm: "FOB"
+  },
+  {
+    id: "CUS-12736945",
+    declarantTIN: "D-1045723691",
+    declarantName: "Fast Track Shipping",
+    consigneeTIN: "C-2047823541",
+    consigneeName: "Medical Supplies Co.",
+    cusdecNumber: "CBHQ1-I-1566",
+    status: "Waiting Confirmation",
+    officeCode: "CBHQ1",
+    channel: "",
+    containerCount: 1,
+    regDate: "2025-01-05",
+    releaseDate: "",
+    invoiceValue: 5687450.25,
+    exporterName: "MedEquip International",
+    originCountry: "DE",
+    incoterm: "CIF"
+  },
+  {
+    id: "CUS-12748523",
+    declarantTIN: "D-1048276531",
+    declarantName: "Eagle Express Cargo",
+    consigneeTIN: "C-2049367215",
+    consigneeName: "Food Processing Ltd.",
+    cusdecNumber: "CBHQ1-I-1567",
+    status: "On Hold",
+    officeCode: "CBHQ1",
+    channel: "Red",
+    containerCount: 3,
+    regDate: "2025-01-06",
+    releaseDate: "",
+    invoiceValue: 8935720.40,
+    exporterName: "Agricultural Products Inc.",
+    originCountry: "AU",
+    incoterm: "DAP"
+  },
+  {
+    id: "CUS-12759682",
+    declarantTIN: "D-1049581726",
+    declarantName: "Prime Customs Agents",
+    consigneeTIN: "C-2051492376",
+    consigneeName: "Construction Materials Co.",
+    cusdecNumber: "CBHQ1-I-1568",
+    status: "Rejected",
+    officeCode: "CBHQ1",
+    channel: "Red",
+    containerCount: 2,
+    regDate: "2025-01-07",
+    releaseDate: "",
+    invoiceValue: 15783950.60,
+    exporterName: "Heavy Industries Corp.",
+    originCountry: "JP",
+    incoterm: "DDP"
   },
   {
     id: "CUS-12731557",
@@ -73,348 +202,135 @@ export const anonymizedCusDecData: AnonymizedCusDecRecord[] = [
     exporterName: "Industrial Supplies Co.",
     originCountry: "IN",
     incoterm: "CFR"
-  },
-  {
-    id: "CUS-12732575",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-4944",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 4,
-    regDate: "2025-01-08",
-    releaseDate: "2025-01-09",
-    invoiceValue: 45504177.57,
-    exporterName: "Industrial Supplies Co.",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12771262",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-9997",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 4,
-    regDate: "2025-01-19",
-    releaseDate: "2025-01-20",
-    invoiceValue: 13593929.59,
-    exporterName: "Agri Products Ltd.",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12771317",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-10001",
-    status: "Released",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 2,
-    regDate: "2025-01-19",
-    releaseDate: "2025-01-20",
-    invoiceValue: 6932565.09,
-    exporterName: "Agri Products Ltd.",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12868438",
-    declarantTIN: "D-1144662987",
-    declarantName: "Beta Logistics Pvt Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-24258",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 3,
-    regDate: "2025-02-11",
-    releaseDate: "2025-02-11",
-    invoiceValue: 7865657.86,
-    exporterName: "Minerals & Chemicals Co.",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12890117",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-27100",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 1,
-    regDate: "2025-02-17",
-    releaseDate: "2025-02-18",
-    invoiceValue: 5156145.78,
-    exporterName: "Pacific Oleochemicals Inc.",
-    originCountry: "ID",
-    incoterm: "CIF"
-  },
-  {
-    id: "CUS-12907614",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-29842",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 10,
-    regDate: "2025-02-20",
-    releaseDate: "2025-02-20",
-    invoiceValue: 97308535.93,
-    exporterName: "Wilmar Trading Group",
-    originCountry: "IN",
-    incoterm: "CIF"
-  },
-  {
-    id: "CUS-12917589",
-    declarantTIN: "D-1144662987",
-    declarantName: "Beta Logistics Pvt Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-30883",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 1,
-    regDate: "2025-02-24",
-    releaseDate: "2025-02-24",
-    invoiceValue: 1361422.86,
-    exporterName: "SSF Plastics Industries",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12923836",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-2040081677",
-    consigneeName: "Global Products Inc.",
-    cusdecNumber: "CBHQ1-I-32152",
-    status: "Released",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 14,
-    regDate: "2025-02-24",
-    releaseDate: "2025-02-25",
-    invoiceValue: 131527471.34,
-    exporterName: "Pacific Oleochemicals Inc.",
-    originCountry: "ID",
-    incoterm: "CIF"
-  },
-  // Adding new records with more diverse data
-  {
-    id: "CUS-12945671",
-    declarantTIN: "D-2138765412",
-    declarantName: "Omega Shipping Services",
-    consigneeTIN: "C-3045129876",
-    consigneeName: "Tech Innovations Ltd.",
-    cusdecNumber: "CBHQ1-I-35127",
-    status: "Processing",
-    officeCode: "CBHQ1",
-    channel: "Red",
-    containerCount: 2,
-    regDate: "2025-03-02",
-    releaseDate: "",
-    invoiceValue: 18750420.35,
-    exporterName: "Electronic Components Co.",
-    originCountry: "CN",
-    incoterm: "CIF"
-  },
-  {
-    id: "CUS-12952368",
-    declarantTIN: "D-1144662987",
-    declarantName: "Beta Logistics Pvt Ltd.",
-    consigneeTIN: "C-4156789023",
-    consigneeName: "Universal Traders Inc.",
-    cusdecNumber: "CBHQ1-I-36584",
-    status: "On Hold",
-    officeCode: "CBHQ1",
-    channel: "Red",
-    containerCount: 3,
-    regDate: "2025-03-05",
-    releaseDate: "",
-    invoiceValue: 32750180.75,
-    exporterName: "Global Manufacturing Ltd.",
-    originCountry: "CN",
-    incoterm: "FOB"
-  },
-  {
-    id: "CUS-12961234",
-    declarantTIN: "D-2138765412",
-    declarantName: "Omega Shipping Services",
-    consigneeTIN: "C-5123456789",
-    consigneeName: "Medical Supplies Co.",
-    cusdecNumber: "CBHQ1-I-38795",
-    status: "Processing",
-    officeCode: "CBHQ1",
-    channel: "Green",
-    containerCount: 1,
-    regDate: "2025-03-08",
-    releaseDate: "",
-    invoiceValue: 5687245.95,
-    exporterName: "Healthcare Products Inc.",
-    originCountry: "SG",
-    incoterm: "DAP"
-  },
-  {
-    id: "CUS-12975869",
-    declarantTIN: "D-3210987654",
-    declarantName: "Premium Clearance Co.",
-    consigneeTIN: "C-6123456780",
-    consigneeName: "Automotive Parts Ltd.",
-    cusdecNumber: "CBHQ1-I-42158",
-    status: "Released",
-    officeCode: "CBHQ1",
-    channel: "Blue",
-    containerCount: 5,
-    regDate: "2025-03-12",
-    releaseDate: "2025-03-13",
-    invoiceValue: 47865321.25,
-    exporterName: "Auto Components International",
-    originCountry: "KR",
-    incoterm: "CIF"
-  },
-  {
-    id: "CUS-12986532",
-    declarantTIN: "D-3210987654",
-    declarantName: "Premium Clearance Co.",
-    consigneeTIN: "C-7123456781",
-    consigneeName: "Food Products International",
-    cusdecNumber: "CBHQ1-I-45236",
-    status: "Rejected",
-    officeCode: "CBHQ1",
-    channel: "Red",
-    containerCount: 4,
-    regDate: "2025-03-15",
-    releaseDate: "",
-    invoiceValue: 29876543.15,
-    exporterName: "Fresh Foods Export Co.",
-    originCountry: "AU",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-12998765",
-    declarantTIN: "D-4123456789",
-    declarantName: "Swift Cargo Solutions",
-    consigneeTIN: "C-8123456782",
-    consigneeName: "Construction Materials Inc.",
-    cusdecNumber: "CBHQ1-I-48721",
-    status: "Processing",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 8,
-    regDate: "2025-03-18",
-    releaseDate: "",
-    invoiceValue: 84567890.45,
-    exporterName: "Heavy Industries Corp.",
-    originCountry: "JP",
-    incoterm: "EXW"
-  },
-  {
-    id: "CUS-13007654",
-    declarantTIN: "D-4123456789",
-    declarantName: "Swift Cargo Solutions",
-    consigneeTIN: "C-9123456783",
-    consigneeName: "Textile Manufacturers Ltd.",
-    cusdecNumber: "CBHQ1-I-52369",
-    status: "Released",
-    officeCode: "CBHQ1",
-    channel: "Green",
-    containerCount: 3,
-    regDate: "2025-03-21",
-    releaseDate: "2025-03-22",
-    invoiceValue: 17658932.55,
-    exporterName: "Cotton Fabric Exports",
-    originCountry: "IN",
-    incoterm: "CFR"
-  },
-  {
-    id: "CUS-13018765",
-    declarantTIN: "D-5123456790",
-    declarantName: "Global Cargo Management",
-    consigneeTIN: "C-1023456784",
-    consigneeName: "Chemical Industries Ltd.",
-    cusdecNumber: "CBHQ1-I-56147",
-    status: "On Hold",
-    officeCode: "CBHQ1",
-    channel: "Red",
-    containerCount: 2,
-    regDate: "2025-03-25",
-    releaseDate: "",
-    invoiceValue: 23456789.95,
-    exporterName: "Chemical Solutions Inc.",
-    originCountry: "DE",
-    incoterm: "DDP"
-  },
-  {
-    id: "CUS-13029876",
-    declarantTIN: "D-5123456790",
-    declarantName: "Global Cargo Management",
-    consigneeTIN: "C-1123456785",
-    consigneeName: "Electronics Distribution Co.",
-    cusdecNumber: "CBHQ1-I-59863",
-    status: "Exempted",
-    officeCode: "CBHQ1",
-    channel: "Blue",
-    containerCount: 1,
-    regDate: "2025-03-28",
-    releaseDate: "2025-03-28",
-    invoiceValue: 8765432.25,
-    exporterName: "Tech Hardware Solutions",
-    originCountry: "US",
-    incoterm: "CIF"
-  },
-  {
-    id: "CUS-13035421",
-    declarantTIN: "D-1040835367",
-    declarantName: "Alpha Freight Ltd.",
-    consigneeTIN: "C-1223456786",
-    consigneeName: "Pharmaceutical Distributors",
-    cusdecNumber: "CBHQ1-I-62589",
-    status: "Processing",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 1,
-    regDate: "2025-03-30",
-    releaseDate: "",
-    invoiceValue: 10987654.35,
-    exporterName: "Medical Research Products",
-    originCountry: "CH",
-    incoterm: "DAP"
-  },
-  {
-    id: "CUS-13042369",
-    declarantTIN: "D-6234567891",
-    declarantName: "Express Customs Brokers",
-    consigneeTIN: "C-6543210987",
-    consigneeName: "Digital Solutions Corp.",
-    cusdecNumber: "CBHQ1-I-65784",
-    status: "Waiting Confirmation",
-    officeCode: "CBHQ1",
-    channel: "Yellow",
-    containerCount: 2,
-    regDate: "2025-04-02",
-    releaseDate: "",
-    invoiceValue: 15687432.45,
-    exporterName: "Tech Innovations Global",
-    originCountry: "KR",
-    incoterm: "CIF"
   }
-]; 
+];
+
+// Container data linked to CusDecs via cusdecId
+export const anonymizedContainers: AnonymizedContainer[] = [
+  {
+    id: "CONT-45781293",
+    number: "MSCU1234567",
+    cusdecId: "CUS-12712517",
+    size: "40ft",
+    type: "Dry",
+    status: "Scanning",
+    location: "Yard1",
+    shippingLine: "MSC",
+    vesselName: "MSC Anna",
+    voyage: "V123-E",
+    arrivalDate: "2025-01-02",
+    lastUpdated: "2025-01-03"
+  },
+  {
+    id: "CONT-45796124",
+    number: "MAEU7654321",
+    cusdecId: "CUS-12724680",
+    size: "20ft",
+    type: "Dry",
+    status: "Released",
+    location: "Exit Gate",
+    shippingLine: "Maersk",
+    vesselName: "Maersk Sealand",
+    voyage: "V456-E",
+    arrivalDate: "2025-01-03",
+    lastUpdated: "2025-01-05"
+  },
+  {
+    id: "CONT-45807935",
+    number: "MAEU8765432",
+    cusdecId: "CUS-12724680",
+    size: "20ft",
+    type: "Dry",
+    status: "Released",
+    location: "Exit Gate",
+    shippingLine: "Maersk",
+    vesselName: "Maersk Sealand",
+    voyage: "V456-E",
+    arrivalDate: "2025-01-03",
+    lastUpdated: "2025-01-05"
+  },
+  {
+    id: "CONT-45819746",
+    number: "CMAU1928374",
+    cusdecId: "CUS-12736945",
+    size: "40ft HC",
+    type: "Refrigerated",
+    status: "Waiting Confirmation",
+    location: "Terminal",
+    shippingLine: "CMA CGM",
+    vesselName: "CMA CGM Marco Polo",
+    voyage: "V789-E",
+    arrivalDate: "2025-01-04",
+    lastUpdated: "2025-01-05"
+  },
+  {
+    id: "CONT-45825638",
+    number: "HLXU2837465",
+    cusdecId: "CUS-12748523",
+    size: "40ft",
+    type: "Dry",
+    status: "Officer Checked",
+    location: "Inspection Area",
+    shippingLine: "Hapag-Lloyd",
+    vesselName: "Hapag Hamburg",
+    voyage: "V321-E",
+    arrivalDate: "2025-01-05",
+    lastUpdated: "2025-01-06"
+  },
+  {
+    id: "CONT-45837492",
+    number: "HLXU3948576",
+    cusdecId: "CUS-12748523",
+    size: "40ft",
+    type: "Dry",
+    status: "Officer Checked",
+    location: "Inspection Area",
+    shippingLine: "Hapag-Lloyd",
+    vesselName: "Hapag Hamburg",
+    voyage: "V321-E",
+    arrivalDate: "2025-01-05",
+    lastUpdated: "2025-01-06"
+  },
+  {
+    id: "CONT-45849265",
+    number: "HLXU4857693",
+    cusdecId: "CUS-12748523",
+    size: "20ft",
+    type: "Dry",
+    status: "Officer Checked",
+    location: "Inspection Area",
+    shippingLine: "Hapag-Lloyd",
+    vesselName: "Hapag Hamburg",
+    voyage: "V321-E",
+    arrivalDate: "2025-01-05",
+    lastUpdated: "2025-01-06"
+  },
+  {
+    id: "CONT-45856379",
+    number: "COSU5746382",
+    cusdecId: "CUS-12759682",
+    size: "40ft",
+    type: "Flat Rack",
+    status: "Detained",
+    location: "Detention Yard",
+    shippingLine: "COSCO",
+    vesselName: "COSCO Europe",
+    voyage: "V654-E",
+    arrivalDate: "2025-01-06",
+    lastUpdated: "2025-01-07"
+  },
+  {
+    id: "CONT-45867594",
+    number: "COSU6857493",
+    cusdecId: "CUS-12759682",
+    size: "40ft",
+    type: "Flat Rack",
+    status: "Detained",
+    location: "Detention Yard",
+    shippingLine: "COSCO",
+    vesselName: "COSCO Europe",
+    voyage: "V654-E",
+    arrivalDate: "2025-01-06",
+    lastUpdated: "2025-01-07"
+  }
+];

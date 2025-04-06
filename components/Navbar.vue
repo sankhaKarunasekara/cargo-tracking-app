@@ -71,7 +71,7 @@
             </div>
             
             <!-- Mobile only - small page title -->
-            <h1 class="text-base font-medium text-gray-900 md:hidden">{{ currentPageTitle }}</h1>
+            <h1 class="pl-2 text-base font-medium text-gray-900 md:hidden">{{ currentPageTitle }}</h1>
           </div>
         </div>
         

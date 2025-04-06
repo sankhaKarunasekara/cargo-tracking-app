@@ -268,12 +268,7 @@ const features = {
       </div>
       
       <!-- Mobile Card Layout Footer -->
-      <div class="flex items-center justify-between px-6 py-4 bg-gray-50">
-        <!-- Progress stages -->
-        <div class="flex items-center">
-          <div class="text-xs font-medium text-gray-600">{{ processingStage }}</div>
-        </div>
-        
+      <div class="flex items-center justify-end px-6 py-4 bg-gray-50">
         <!-- Action buttons -->
         <div class="flex space-x-2">
           <!-- Show Acknowledge button for Waiting Confirmation status -->
@@ -299,7 +294,7 @@ const features = {
               <path d="M12 8v4l3 3"></path>
               <circle cx="12" cy="12" r="10"></circle>
             </svg>
-            Timeline
+            Track
           </button>
           
           <ButtonComponent
