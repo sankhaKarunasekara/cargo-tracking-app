@@ -1,4 +1,8 @@
-import { AnonymizedCusDecRecord, anonymizedCusDecData } from './anonymizedCusDecData';
+import {
+  AnonymizedCusDecRecord,
+  anonymizedCusDecData,
+  YardLocations
+} from './anonymizedCusDecData';
 
 /**
  * Function to get all CusDec data
@@ -150,4 +154,74 @@ export function calculateCusDecStats() {
     channelDistribution,
     countryDistribution
   };
+}
+
+// Map status from data to processing stage
+export function mapCusDecStatusToProcessingStage(status: string): string {
+  status = status.toLowerCase();
+  if (status === 'processing' || status === 'on hold') {
+    return 'processing';
+  } else if (status === 'rejected') {
+    return 'detained';
+  } else if (status === 'released' || status === 'exempted') {
+    return 'exited';
+  } else {
+    return status; // Return original for 'waiting confirmation' or unknown statuses
+  }
+}
+
+// Get status badge class for CusDec status
+export function getCusDecStatusBadgeClass(status: string): string {
+  const statusLower = status.toLowerCase();
+  switch (statusLower) {
+    case 'released':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
+    case 'processing':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800';
+    case 'on hold':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800';
+    case 'rejected':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800';
+    case 'exempted':
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800';
+    default:
+      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800';
+  }
+}
+
+// Format date for display
+export function formatCusDecDate(dateString: string): string {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+/**
+ * Maps a CusDec status to the corresponding yard location
+ * @param status The status of the customs declaration
+ * @returns The corresponding yard location
+ */
+export function mapCusDecStatusToYardLocation(status: string): YardLocations {
+  const statusLower = status.toLowerCase();
+
+  switch (statusLower) {
+    case 'processing':
+      return YardLocations.GRAYLINE1;
+    case 'on hold':
+      return YardLocations.GRAYLINE2;
+    case 'waiting confirmation':
+      return YardLocations.OUTPANEL;
+    case 'released':
+      return YardLocations.RELEASE;
+    case 'exempted':
+      return YardLocations.EXEMPTED;
+    case 'rejected':
+    case 'detained':
+      return YardLocations.OGAOUTPANEL;
+    default:
+      return YardLocations.GRAYLINE2;
+  }
 } 

@@ -1,23 +1,37 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, provide, onUnmounted } from 'vue'
+import { ref, computed, onMounted, provide, onUnmounted, watch } from 'vue'
 import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
 import Pagination from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
 import StatusTimelineSheet from '../components/StatusTimelineSheet.vue'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
+import { useRoute, useRouter } from 'vue-router'
 import { 
   getAllContainerData, 
   filterContainers, 
   calculateContainerStats,
-  AnonymizedContainer
+  AnonymizedContainer,
+  containerTrackingData,
+  containerStatusTabs,
+  containerFilterDefinitions,
+  FilterDefinition,
+  getDefaultDateRange
 } from '../lib/data'
 
-// Define page metadata
+// Get route and router for URL parameter handling
+const route = useRoute()
+const router = useRouter()
+
+// Define page metadata (this will be defined in a proper way later)
+// In Nuxt, definePageMeta is available globally in page components
+// But since we're not in a Nuxt context for this project, we'll comment it out
+/* 
 definePageMeta({
   title: 'Container Tracking',
   description: 'Track and monitor your containers with real-time location and status updates'
 })
+*/
 
 // Get window size and mobile status
 const { isMobile } = useWindowSize()
@@ -33,12 +47,7 @@ type Filter = {
 };
 
 // Status tabs
-const statusTabs = ref([
-  { id: 'all', label: 'All', active: true },
-  { id: 'scanning', label: 'Scanning', active: false },
-  { id: 'officer_checked', label: 'Officer Checked', active: false },
-  { id: 'send_to_yard', label: 'Send To Yard', active: false }
-])
+const statusTabs = ref([...containerStatusTabs])
 
 // Active status filter
 const activeStatusFilter = ref('all')
@@ -52,34 +61,8 @@ const setActiveStatus = (statusId: string) => {
   activeStatusFilter.value = statusId
 }
 
-// Filters state
-const filters = ref<Filter[]>([
-  {
-    id: 'container',
-    label: 'Container',
-    type: 'text',
-    placeholder: 'Enter container number',
-    value: ''
-  },
-  {
-    id: 'location',
-    label: 'Location',
-    type: 'text',
-    placeholder: 'Enter location',
-    value: ''
-  },
-  {
-    id: 'status',
-    label: 'Status',
-    type: 'select',
-    options: [
-      { value: 'scanning', label: 'Scanning' },
-      { value: 'officer_checked', label: 'Officer Checked' },
-      { value: 'send_to_yard', label: 'Send To Yard' }
-    ],
-    value: ''
-  }
-])
+// Filters state - ensure correct typing
+const filters = ref<FilterDefinition[]>([...containerFilterDefinitions])
 
 // Get data from our data utilities
 const allContainers = ref<AnonymizedContainer[]>(getAllContainerData())
@@ -104,16 +87,29 @@ const selectedTimelineItem = ref({
 })
 
 // Date range for filtering
-const dateRange = ref({
-  startDate: '',
-  endDate: ''
+const dateRange = ref(getDefaultDateRange())
+
+// Check if any filters are applied
+const hasActiveFilters = computed(() => {
+  return filters.value.some(filter => filter.value) || 
+         dateRange.value.startDate !== getDefaultDateRange().startDate ||
+         dateRange.value.endDate !== getDefaultDateRange().endDate ||
+         activeStatusFilter.value !== 'all'
+})
+
+// Check specifically if cusdec filter is applied
+const hasCusdecFilter = computed(() => {
+  const containerFilter = filters.value.find(f => f.id === 'cusdec')
+  return containerFilter && containerFilter.value
 })
 
 // Filter containers based on our filter utilities
 const filteredContainers = computed(() => {
   return filterContainers({
     containerNumber: filters.value.find(f => f.id === 'container')?.value,
+    cusdecNumber: filters.value.find(f => f.id === 'cusdec')?.value,
     location: filters.value.find(f => f.id === 'location')?.value,
+    channel: filters.value.find(f => f.id === 'channel')?.value || undefined,
     status: activeStatusFilter.value !== 'all' ? activeStatusFilter.value : undefined,
     startDate: dateRange.value.startDate || undefined,
     endDate: dateRange.value.endDate || undefined
@@ -176,6 +172,9 @@ const handleViewDetails = (container: AnonymizedContainer) => {
 
 // Handle view timeline
 const handleViewTimeline = (container: AnonymizedContainer) => {
+  // Check if we have tracking data for this container
+  const hasTrackingData = containerTrackingData[container.number]?.length > 0
+  
   selectedTimelineItem.value = {
     id: container.id,
     type: 'container',
@@ -192,18 +191,79 @@ const toggleFilters = () => {
 // Handle reset
 const handleReset = () => {
   filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
-  dateRange.value = { startDate: '', endDate: '' }
+  dateRange.value = getDefaultDateRange()
   currentPage.value = 1
   displayedItemsCount.value = itemsPerPage
+  
+  // Remove cusdec query parameter if it exists
+  if (route.query.cusdec) {
+    router.replace({ query: { ...route.query, cusdec: undefined } })
+  }
 }
 
 // Provide the toggleFilters function to the navbar
 provide('toggleFilters', toggleFilters)
 
-// Alternatively, if you have a more sophisticated event bus system:
+// Initialize with cusdec filter
 onMounted(() => {
   document.addEventListener('toggle-filters', toggleFilters)
+  
+  // Ensure we have a cusdec filter
+  if (!filters.value.some(f => f.id === 'cusdec')) {
+    filters.value.push({
+      id: 'cusdec',
+      label: 'CusDec Number',
+      placeholder: 'Enter CusDec number',
+      type: 'text',
+      value: ''
+    })
+  }
+  
+  // Check if cusdec parameter exists in URL
+  const cusdecParam = route.query.cusdec as string
+  if (cusdecParam) {
+    // Apply filter for the specified cusdec number
+    const cusdecFilter = filters.value.find(f => f.id === 'cusdec')
+    if (cusdecFilter) {
+      cusdecFilter.value = cusdecParam
+      
+      // Apply the filter immediately
+      handleSearch()
+      
+      // Keep filters collapsed but indicate they are applied
+      showFilters.value = false
+      
+      // Reset pagination
+      currentPage.value = 1
+      displayedItemsCount.value = itemsPerPage
+    }
+  }
 })
+
+// Watch for URL changes to update filters
+watch(() => route.query.cusdec, (newCusdec) => {
+  if (newCusdec) {
+    // Apply filter for the specified cusdec number
+    const cusdecFilter = filters.value.find(f => f.id === 'cusdec')
+    if (cusdecFilter) {
+      cusdecFilter.value = newCusdec as string
+      
+      // Reset pagination
+      currentPage.value = 1
+      displayedItemsCount.value = itemsPerPage
+    }
+  } else {
+    // Reset cusdec filter if cusdec parameter is removed
+    const cusdecFilter = filters.value.find(f => f.id === 'cusdec')
+    if (cusdecFilter && cusdecFilter.value) {
+      cusdecFilter.value = ''
+      
+      // Reset pagination
+      currentPage.value = 1
+      displayedItemsCount.value = itemsPerPage
+    }
+  }
+}, { immediate: true })
 
 // Add cleanup if necessary
 onUnmounted(() => {
@@ -214,8 +274,70 @@ onUnmounted(() => {
 <template>
   <div class="min-h-screen pb-20 bg-gray-50">
     <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+      <!-- Page Header -->
+      <header class="flex items-center justify-between py-6">
+        <h1 class="text-2xl font-bold text-gray-900">Container Tracking</h1>
+        
+        <div>
+          <button 
+            @click="toggleFilters" 
+            :class="[
+              'flex items-center px-4 py-2 text-sm font-medium transition-colors border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+              hasActiveFilters ? 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            ]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <span>Filters</span>
+            <!-- Filter applied badge -->
+            <span v-if="hasCusdecFilter" class="flex items-center justify-center w-5 h-5 ml-2 text-xs font-medium text-white bg-blue-600 rounded-full">
+              1
+            </span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="ml-2 transition-transform" 
+              :class="{ 'rotate-0': showFilters, 'rotate-180': !showFilters }"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+      </header>
+      
+      <!-- Active Filters Display (when filters are applied but not expanded) -->
+      <div v-if="hasCusdecFilter && !showFilters" class="flex p-3 mb-4 space-x-2 bg-white rounded-lg shadow-sm">
+        <div class="flex items-center">
+          <span class="text-sm font-medium text-gray-700">Filtered by:</span>
+        </div>
+        <div class="flex items-center px-3 py-1 text-sm bg-blue-50 border border-blue-100 rounded-full">
+          <span class="font-medium text-blue-800">CusDec: {{ filters.find(f => f.id === 'cusdec')?.value }}</span>
+          <button 
+            @click="() => { 
+              const cusdecFilter = filters.find(f => f.id === 'cusdec'); 
+              if (cusdecFilter) cusdecFilter.value = ''; 
+              if (route.query.cusdec) router.replace({ query: { ...route.query, cusdec: undefined } })
+            }" 
+            class="ml-1.5 text-blue-600 hover:text-blue-800"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
       <!-- Status Tabs -->
-      <div class="p-3 mt-6 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+      <div class="p-3 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
         <div class="flex space-x-2">
           <button 
             v-for="tab in statusTabs" 
@@ -233,36 +355,8 @@ onUnmounted(() => {
         </div>
       </div>
       
-      <!-- Simple filter toggle button -->
-      <div class="p-4 mb-5 bg-white rounded-lg shadow-sm">
-        <button 
-          @click="toggleFilters" 
-          class="flex items-center text-sm font-medium text-gray-700 focus:outline-none"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-          </svg>
-          <span>Advanced Filters</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            class="ml-2 transition-transform" 
-            :class="{ 'rotate-180': showFilters }"
-          >
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-      </div>
-      
       <!-- Filters panel -->
-      <div v-if="showFilters" class="p-5 mb-5 bg-white rounded-lg shadow-sm">
+      <div v-if="showFilters" class="p-5 mb-5 bg-white rounded-lg shadow-sm lg:hidden">
         <FilterSection
           :filters="filters"
           @update:filters="handleFilterUpdate"
@@ -275,6 +369,7 @@ onUnmounted(() => {
         <!-- Side Panel with filters (larger screens only) -->
         <div 
           class="flex-shrink-0 hidden h-auto mb-5 transition-all duration-200 bg-white rounded-lg shadow-sm lg:block lg:w-64 xl:w-80 lg:sticky lg:top-16 lg:self-start"
+          v-if="showFilters"
         >
           <div class="p-5 lg:p-4">
             <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>
@@ -446,4 +541,8 @@ onUnmounted(() => {
       :status="selectedTimelineItem.status"
     />
   </div>
-</template> 
+</template>
+
+<style scoped>
+/* Add any component-specific styles here */
+</style> 

@@ -13,36 +13,27 @@ import {
   getAllCusDecData, 
   filterCusDecs, 
   calculateCusDecStats,
-  AnonymizedCusDecRecord
+  AnonymizedCusDecRecord,
+  cusDecStatusTabs,
+  cusDecFilterDefinitions,
+  FilterDefinition,
+  getDefaultDateRange,
+  formatCusDecDate,
+  mapCusDecStatusToProcessingStage,
+  getCusDecStatusBadgeClass
 } from '../lib/data'
 
 // Define page metadata
-definePageMeta({
-  title: 'CusDec Tracking',
-  description: 'Track and manage your customs declarations with real-time status updates'
-})
+// definePageMeta({
+//   title: 'CusDec Tracking',
+//   description: 'Track and manage your customs declarations with real-time status updates'
+// })
 
 // Get window size and mobile status
 const { isMobile } = useWindowSize()
 
-// Define filter type
-type Filter = {
-  id: string;
-  label: string;
-  placeholder?: string;
-  type?: 'text' | 'select' | 'date';
-  options?: Array<{ value: string; label: string }>;
-  value: string;
-};
-
 // Status tabs
-const statusTabs = ref([
-  { id: 'all', label: 'All', active: true },
-  { id: 'waiting confirmation', label: 'Waiting Confirmation', active: false },
-  { id: 'processing', label: 'Processing', active: false },
-  { id: 'detained', label: 'Detained', active: false },
-  { id: 'exited', label: 'Exited', active: false }
-])
+const statusTabs = ref([...cusDecStatusTabs])
 
 // Active status filter
 const activeStatusFilter = ref('all')
@@ -62,46 +53,11 @@ const setActiveStatus = (statusId: string) => {
   displayedItemsCount.value = itemsPerPage
 }
 
-// Set default date range for current year
-const getLastMonthDateRange = () => {
-  const today = new Date()
-  const endDate = today.toISOString().slice(0, 10) // Current date in YYYY-MM-DD format
-  
-  // Get date from 2025-01-01 (as our data starts from 2025)
-  const startDate = new Date('2025-01-01')
-  
-  return {
-    startDate: startDate.toISOString().slice(0, 10),
-    endDate
-  }
-}
-
-const dateRange = ref(getLastMonthDateRange())
+// Date range for filtering
+const dateRange = ref(getDefaultDateRange())
 
 // Filters state
-const filters = ref<Filter[]>([
-  {
-    id: 'cusdecNumber',
-    label: 'CusDec Number',
-    type: 'text',
-    placeholder: 'Enter CusDec number',
-    value: ''
-  },
-  {
-    id: 'declarantTIN',
-    label: 'Declarant TIN Number',
-    type: 'text',
-    placeholder: 'Enter TIN number',
-    value: ''
-  },
-  {
-    id: 'consigneeTIN',
-    label: 'Consignee TIN Number',
-    type: 'text',
-    placeholder: 'Enter TIN number',
-    value: ''
-  }
-])
+const filters = ref<FilterDefinition[]>([...cusDecFilterDefinitions])
 
 // Get real data from our anonymized dataset
 const allCusDecs = ref<AnonymizedCusDecRecord[]>(getAllCusDecData())
@@ -122,19 +78,31 @@ const selectedTimelineItem = ref({
   status: ''
 })
 
-// Set sidebar visibility based on screen size
+// Set sidebar and filters visibility based on screen size
 onMounted(() => {
   // Check if screen is larger than mobile (md breakpoint)
   const isDesktop = window.innerWidth >= 768
   
   // For mobile view, always start with sidebar hidden
-  showSidebar.value = isDesktop
+  if (!isDesktop) {
+    showSidebar.value = false
+    showFilters.value = false
+  } else {
+    // For desktop, always show the sidebar in the UI
+    showSidebar.value = true
+    // But keep filters collapsed initially
+    showFilters.value = false
+  }
   
-  // Add resize listener to update sidebar visibility
+  // Add resize listener to update visibility
   const handleResize = () => {
-    if (window.innerWidth >= 768) {
-      // For desktop, always show the sidebar in the UI (but not the mobile panel)
+    const isDesktopNow = window.innerWidth >= 768
+    if (isDesktopNow && !isMobile.value) {
+      // Transitioning to desktop
       showSidebar.value = true
+    } else if (!isDesktopNow && isMobile.value) {
+      // Transitioning to mobile - hide sidebar by default
+      showSidebar.value = false
     }
   }
   
@@ -154,15 +122,21 @@ onMounted(() => {
 
 // Toggle sidebar function
 const toggleSidebar = () => {
-  showSidebar.value = !showSidebar.value
+  // For mobile view, we directly toggle the showSidebar value
+  if (isMobile.value) {
+    showSidebar.value = !showSidebar.value
+  } else {
+    // For desktop view, we toggle the showFilters value
+    // This is separate from showSidebar which controls visibility on mobile
+    showFilters.value = !showFilters.value
+  }
 }
 
 // Toggle filters function (for navbar integration)
 const toggleFilters = () => {
-  // On mobile, toggle the filters panel visibility
-  if (isMobile.value) {
-    showSidebar.value = !showSidebar.value
-  }
+  // This function is called from other components
+  // Delegate to toggleSidebar for consistent behavior
+  toggleSidebar()
 }
 
 // Provide the toggle function to allow other components to toggle filters
@@ -171,22 +145,8 @@ provide('toggleFilters', toggleFilters)
 // Define cusdec stats
 const cusDecStats = calculateCusDecStats()
 
-// Map status from data to processing stage
-const mapStatusToProcessingStage = (status: string): string => {
-  status = status.toLowerCase();
-  if (status === 'processing' || status === 'on hold') {
-    return 'processing';
-  } else if (status === 'rejected') {
-    return 'detained';
-  } else if (status === 'released' || status === 'exempted') {
-    return 'exited';
-  } else {
-    return status; // Return original for 'waiting confirmation' or unknown statuses
-  }
-}
-
 // Handle filter update
-const handleFilterUpdate = (updatedFilters: Filter[]) => {
+const handleFilterUpdate = (updatedFilters: FilterDefinition[]) => {
   filters.value = updatedFilters
 }
 
@@ -214,7 +174,7 @@ const handleReset = () => {
   filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
   
   // Reset date range
-  dateRange.value = getLastMonthDateRange()
+  dateRange.value = getDefaultDateRange()
   
   // Reset pagination
   currentPage.value = 1
@@ -235,7 +195,7 @@ const filteredCusDecs = computed(() => {
   // Then apply processing stage filter if needed
   if (activeStatusFilter.value !== 'all') {
     filtered = filtered.filter(record => {
-      return mapStatusToProcessingStage(record.status).toLowerCase() === activeStatusFilter.value.toLowerCase();
+      return mapCusDecStatusToProcessingStage(record.status).toLowerCase() === activeStatusFilter.value.toLowerCase();
     });
   }
   
@@ -326,38 +286,47 @@ const tableHeaders = [
 ];
 
 // Get status badge class for desktop view
-const getStatusBadgeClass = (status: string) => {
-  const statusLower = status.toLowerCase();
-  switch (statusLower) {
-    case 'released':
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
-    case 'processing':
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800';
-    case 'on hold':
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800';
-    case 'rejected':
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800';
-    case 'exempted':
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800';
-    default:
-      return 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800';
-  }
-};
+const getStatusBadgeClass = (status: string) => getCusDecStatusBadgeClass(status);
 
 // Format date for display
-const formatDate = (dateString: string) => {
-  if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
+const formatDate = (dateString: string) => formatCusDecDate(dateString);
 </script>
 
 <template>
   <div class="min-h-screen pb-20 bg-gray-50">
     <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+      <!-- Page Header -->
+      <header class="flex items-center justify-between py-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">CusDec Tracking</h1>
+        
+        <div>
+          <button 
+            @click="toggleSidebar" 
+            class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <span>Filters</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="ml-2 transition-transform" 
+              :class="{ 'rotate-0': isMobile ? showSidebar : showFilters, 'rotate-180': isMobile ? !showSidebar : !showFilters }"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+      </header>
+      
       <!-- Status Tabs -->
       <div class="p-3 mt-6 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
         <div class="flex space-x-2">
@@ -377,38 +346,8 @@ const formatDate = (dateString: string) => {
         </div>
       </div>
       
-      <!-- Simple filter toggle button (for mobile) -->
-      <div class="p-4 mb-5 bg-white rounded-lg shadow-sm md:hidden">
-        <button 
-          @click="toggleSidebar" 
-          class="flex w-full items-center justify-between text-sm font-medium text-gray-700 focus:outline-none"
-        >
-          <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-            </svg>
-            <span>Advanced Filters</span>
-          </div>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            class="ml-2 transition-transform" 
-            :class="{ 'rotate-180': showSidebar }"
-          >
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-      </div>
-      
       <!-- Filters panel (for mobile) -->
-      <div v-if="showSidebar" class="p-5 mb-5 bg-white rounded-lg shadow-sm md:hidden">
+      <div v-if="showSidebar && isMobile" class="p-5 mb-5 bg-white rounded-lg shadow-sm md:hidden">
         <div class="space-y-5">
           <!-- Date Range Picker -->
           <div class="mb-6">
@@ -502,6 +441,7 @@ const formatDate = (dateString: string) => {
         <!-- Side Panel with filters (only visible on desktop) -->
         <div 
           class="hidden md:block md:w-80 xl:w-80 lg:w-64 bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-5 rounded-lg transition-all duration-200"
+          v-if="!isMobile && showFilters"
         >
           <div class="p-5 lg:p-4">
             <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>

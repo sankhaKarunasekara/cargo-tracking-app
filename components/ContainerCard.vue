@@ -1,230 +1,426 @@
 <script setup lang="ts">
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card'
 import ButtonComponent from './ui/button/index'
+import StatusTimelineButton from './StatusTimelineButton.vue'
+import { ref, computed } from 'vue'
+import { 
+  AnonymizedContainer, 
+  yardLocationColors, 
+  YardLocations,
+  formatContainerDate,
+  getContainerDefaults,
+  getContainerStatusColorClass,
+  mapContainerStatusToProcessingStage,
+  getContainerProgressPercentage,
+  getContainerFeatures
+} from '../lib/data'
+import { useRouter } from 'vue-router'
 
-// Define the props
-interface Container {
-  id: string;
-  number: string;
-  location: string;
-  status: string;
-  shippingLine: string;
-  vesselName: string;
-  voyage: string;
-  size: string;
+// Add additional type information to support the component properties
+interface ExtendedContainer extends AnonymizedContainer {
+  destination?: string;
+  origin?: string;
 }
 
+// Define the props
 interface Props {
-  container: Container;
+  container: ExtendedContainer;
 }
 
 const props = defineProps<Props>();
+const router = useRouter();
 
 // Define the emits
 const emit = defineEmits<{
-  'viewDetails': [container: Container];
-  'viewTimeline': [container: Container];
+  'view-details': [container: ExtendedContainer];
+  'view-timeline': [container: ExtendedContainer];
 }>();
 
 // Method to handle view details click
 const handleViewDetails = () => {
-  emit('viewDetails', props.container);
+  emit('view-details', props.container);
+  router.push(`/container/${props.container.id}`);
 };
 
 // Method to handle view timeline click
 const handleViewTimeline = () => {
-  emit('viewTimeline', props.container);
+  emit('view-timeline', props.container);
 };
 
+// Get container defaults
+const containerDefaults = computed(() => getContainerDefaults(props.container));
+
+// Format arrival date for display
+const formattedDate = computed(() => formatContainerDate(props.container.arrivalDate));
+
+// Get container size with default
+const containerSize = computed(() => containerDefaults.value.size);
+
+// Get container type with default
+const containerType = computed(() => containerDefaults.value.type);
+
+// Get origin with default
+const origin = computed(() => props.container.origin || containerDefaults.value.origin);
+
+// Get destination with default
+const destination = computed(() => props.container.destination || containerDefaults.value.destination);
+
 // Get status color based on status value
-const getStatusColor = () => {
-  switch (props.container.status.toLowerCase()) {
-    case 'scanning':
-    case 'registered':
-      return 'status-bg-submitted'
-    case 'doc checked':
-      return 'status-bg-review'
-    case 'acknowledgedgate':
-    case 'acknowledgedyard':
-      return 'status-bg-review'
-    case 'exitedyard':
-    case 'send to yard':
-    case 'officer checked':
-      return 'status-bg-paid'
-    case 'cancelled':
-    case 'detained':
-      return 'status-bg-error'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
+const getStatusColor = () => getContainerStatusColorClass(props.container.status);
+
+// Map status to processing stage
+const processingStage = computed(() => mapContainerStatusToProcessingStage(props.container.status));
 
 // Generate progress indicator based on status
-const getProgressPercentage = () => {
-  const statusOrder = [
-    'registered', 
-    'doc checked', 
-    'acknowledgedgate', 
-    'acknowledgedyard', 
-    'exitedyard'
-  ]
+const getProgressPercentage = () => getContainerProgressPercentage(props.container.status);
+
+// Features based on status
+const features = computed(() => getContainerFeatures(props.container.status));
+
+// Get the color styling for a yard location
+const getLocationColor = computed(() => {
+  const location = props.container.location || '';
   
-  const currentStatus = props.container.status.toLowerCase()
-  const index = statusOrder.indexOf(currentStatus)
+  // Type guard to check if the location is a valid yard location
+  const isValidYardLocation = (loc: string): loc is YardLocations => {
+    return loc in yardLocationColors;
+  };
   
-  if (index >= 0) {
-    return (index + 1) / statusOrder.length * 100
+  if (isValidYardLocation(location)) {
+    return {
+      bg: yardLocationColors[location].bg,
+      text: yardLocationColors[location].text,
+      border: yardLocationColors[location].border
+    };
   }
   
-  return 0 // For cancelled or other statuses
-}
-
-// Mock features for display (can be replaced with actual data)
-const features = {
-  registration: props.container.status !== '',
-  docCheck: ['Doc Checked', 'AcknowledgedGate', 'AcknowledgedYard', 'ExitedYard'].includes(props.container.status),
-  gate: ['AcknowledgedGate', 'AcknowledgedYard', 'ExitedYard'].includes(props.container.status),
-  yard: ['AcknowledgedYard', 'ExitedYard'].includes(props.container.status)
-}
+  // Default styling if location not found
+  return {
+    bg: 'bg-indigo-50',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200'
+  };
+});
 </script>
 
 <template>
-  <Card class="mb-4 overflow-hidden transition-shadow duration-200 hover:shadow-md">
-    <div class="p-5">
-      <!-- Header with container icon and status -->
-      <div class="flex items-start justify-between mb-4">
-        <div class="flex items-start">
-          <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-3 rounded-full bg-blue-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"></path>
-              <path d="m7 16.5-4.74-2.85"></path>
-              <path d="m7 16.5 5-3"></path>
-              <path d="M7 16.5V21"></path>
-              <path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"></path>
-              <path d="m17 16.5-5-3"></path>
-              <path d="m17 16.5 4.74-2.85"></path>
-              <path d="M17 16.5V21"></path>
-            </svg>
+  <Card class="mb-5 overflow-hidden transition-all duration-200 border border-gray-100 rounded-lg shadow-sm hover:shadow-md">
+    <!-- Mobile Card Layout (display only on small screens) -->
+    <div class="lg:hidden">
+      <!-- Card Header -->
+      <div class="p-6 pb-4">
+        <div class="flex items-start justify-between gap-4">
+          <!-- Left: Container icon and number -->
+          <div class="flex items-start min-w-0">
+            <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 rounded-md bg-blue-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                <rect x="1" y="3" width="15" height="13" rx="1"></rect>
+                <path d="M16 8h4l3 5v5a1 1 0 0 1-1 1h-1"></path>
+                <path d="M16 16h-4a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h4"></path>
+                <circle cx="5.5" cy="19.5" r="2.5"></circle>
+                <circle cx="18.5" cy="19.5" r="2.5"></circle>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-base font-semibold text-gray-900 truncate">{{ container.number }}</h3>
+              <div class="flex items-center mt-1 text-xs text-gray-500">
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ container.cusdecId }}</span>
+                <span class="mx-1.5">•</span>
+                <span>{{ formattedDate }}</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ container.number }}</h3>
-            <p class="mt-1 text-sm text-gray-600">{{ container.shippingLine }}</p>
+          
+          <!-- Right: Status badge -->
+          <div class="flex flex-col items-end flex-shrink-0">
+            <div :class="['px-3 py-1 text-xs font-medium rounded-full', getStatusColor()]">
+              {{ container.status }}
+            </div>
           </div>
         </div>
-
-        <div :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusColor()]">
-          {{ container.status }}
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div class="mb-3">
-        <p class="text-sm leading-relaxed text-gray-700">
-          {{ container.vesselName }}, {{ container.voyage }}, Size: {{ container.size }}
-        </p>
       </div>
       
-      <!-- Progress bar -->
-      <div class="mb-5">
-        <div class="flex justify-between mb-1 text-xs text-gray-500">
-          <span>Processing</span>
-          <span>{{ container.status === 'ExitedYard' ? 'Completed' : 'In Progress' }}</span>
+      <!-- Card Divider -->
+      <div class="h-px bg-gray-100"></div>
+      
+      <!-- Card Content -->
+      <div class="p-6 pt-4">
+        <!-- Type and Size -->
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <!-- Container Type -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+            </svg>
+            {{ containerType }}
+          </div>
+          
+          <!-- Container Size -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            {{ containerSize }}
+          </div>
         </div>
-        <div class="w-full h-2 bg-gray-200 rounded-full">
-          <div 
-            class="h-2 bg-blue-600 rounded-full" 
-            :style="{ width: `${getProgressPercentage()}%` }"
-          ></div>
+        
+        <!-- Vessel Info -->
+        <div class="space-y-2 text-sm">
+          <div class="flex">
+            <span class="flex-shrink-0 w-20 text-gray-500">Vessel:</span>
+            <span class="font-medium text-gray-700 truncate">{{ container.vesselName }}</span>
+          </div>
+          <div class="flex">
+            <span class="flex-shrink-0 w-20 text-gray-500">Voyage:</span>
+            <span class="font-medium text-gray-700 truncate">{{ container.voyage }}</span>
+          </div>
+          <div class="flex">
+            <span class="flex-shrink-0 w-20 text-gray-500">BL No:</span>
+            <span class="font-medium text-gray-700 truncate">{{ container.cusdecId }}</span>
+          </div>
+        </div>
+        
+        <!-- Add separator here above origin and location -->
+        <div class="h-px my-4 bg-gray-100"></div>
+        
+        <!-- Origin and Location (bottom of content) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Origin -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M12 12c2-2.96 0-7-1-8c0 3.038-1.773 4.741-3 6c-1.226 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.532-1.056-3.94-2-5c-1.786 3-2 4-4 2z"></path>
+            </svg>
+            {{ origin }}
+          </div>
+          
+          <!-- Yard Location -->
+          <div :class="[
+            'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
+            getLocationColor.bg, 
+            getLocationColor.text
+          ]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {{ container.location || destination }}
+          </div>
         </div>
       </div>
-
-      <!-- Features -->
-      <div class="flex flex-wrap gap-3 mb-5">
-        <div class="flex items-center" :class="features.registration ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Registration</span>
-        </div>
-
-        <div class="flex items-center" :class="features.docCheck ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Doc Check</span>
-        </div>
-
-        <div class="flex items-center" :class="features.gate ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-sm">Gate Pass</span>
-        </div>
-
-        <div class="flex items-center" :class="features.yard ? 'text-blue-600' : 'text-gray-400'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
-            <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
-          </svg>
-          <span class="text-sm">Yard</span>
+      
+      <!-- Mobile Card Layout Footer -->
+      <div class="flex items-center justify-end px-6 py-4 bg-gray-50">
+        <!-- Action buttons -->
+        <div class="flex space-x-2">
+          <button 
+            @click="handleViewTimeline"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium transition-colors rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Track
+          </button>
+          
+          <ButtonComponent
+            variant="custom"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click="handleViewDetails"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"></path>
+            </svg>
+            View
+          </ButtonComponent>
         </div>
       </div>
     </div>
-
-    <!-- Updated Action buttons in CardFooter to match table-like layout -->
-    <CardFooter class="px-5 pt-0 pb-5">
-      <div class="flex flex-col items-center justify-end w-full gap-2 sm:flex-row sm:ms-auto">
-        <ButtonComponent 
-          variant="outline"
-          size="sm" 
-          class="w-full sm:w-28"
-          @click="handleViewDetails"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg"
-            width="16" 
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="mr-2"
-          >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          More Info
-        </ButtonComponent>
+    
+    <!-- Desktop Card Layout (display only on large screens) -->
+    <div class="hidden lg:flex">
+      <div class="flex-grow min-w-0 p-6">
+        <div class="flex items-start gap-4">
+          <!-- Left: Container icon and number -->
+          <div class="flex items-start min-w-0">
+            <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 rounded-md bg-blue-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                <rect x="1" y="3" width="15" height="13" rx="1"></rect>
+                <path d="M16 8h4l3 5v5a1 1 0 0 1-1 1h-1"></path>
+                <path d="M16 16h-4a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h4"></path>
+                <circle cx="5.5" cy="19.5" r="2.5"></circle>
+                <circle cx="18.5" cy="19.5" r="2.5"></circle>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-base font-semibold text-gray-900 truncate">{{ container.number }}</h3>
+              <div class="flex items-center mt-1 text-xs text-gray-500">
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ container.cusdecId }}</span>
+                <span class="mx-1.5">•</span>
+                <span>{{ formattedDate }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Status badge -->
+          <div :class="['px-3 py-1 text-xs font-medium rounded-full flex-shrink-0 whitespace-nowrap', getStatusColor()]">
+            {{ container.status }}
+          </div>
+        </div>
         
-        <ButtonComponent
-          variant="primary"
-          size="sm"
-          class="w-full sm:w-28"
-          @click="handleViewTimeline"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="mr-2"
-          >
-            <path d="M12 8v4l3 3"></path>
-            <circle cx="12" cy="12" r="10"></circle>
-          </svg>
-          Timeline
-        </ButtonComponent>
+        <div class="mt-4">
+          <!-- Type and Size -->
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <!-- Container Type -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+              </svg>
+              {{ containerType }}
+            </div>
+            
+            <!-- Container Size -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+              </svg>
+              {{ containerSize }}
+            </div>
+          </div>
+          
+          <!-- Vessel Info -->
+          <div class="space-y-2 text-sm">
+            <div class="flex min-w-0">
+              <span class="flex-shrink-0 w-20 text-gray-500">Vessel:</span>
+              <span class="font-medium text-gray-700 truncate">{{ container.vesselName }}</span>
+            </div>
+            <div class="flex min-w-0">
+              <span class="flex-shrink-0 w-20 text-gray-500">Voyage:</span>
+              <span class="font-medium text-gray-700 truncate">{{ container.voyage }}</span>
+            </div>
+            <div class="flex min-w-0">
+              <span class="flex-shrink-0 w-20 text-gray-500">BL No:</span>
+              <span class="font-medium text-gray-700 truncate">{{ container.cusdecId }}</span>
+            </div>
+          </div>
+          
+          <!-- Add separator here above origin and location -->
+          <div class="h-px my-4 bg-gray-100"></div>
+          
+          <!-- Origin and Location (desktop bottom content) -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Origin -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <path d="M12 12c2-2.96 0-7-1-8c0 3.038-1.773 4.741-3 6c-1.226 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.532-1.056-3.94-2-5c-1.786 3-2 4-4 2z"></path>
+              </svg>
+              {{ origin }}
+            </div>
+            
+            <!-- Yard Location -->
+            <div :class="[
+              'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
+              getLocationColor.bg, 
+              getLocationColor.text
+            ]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              {{ container.location || destination }}
+            </div>
+            
+            <!-- Channel Badge -->
+            <div v-if="container.channel" :class="[
+              'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
+              container.channel.toLowerCase() === 'red' ? 'bg-red-100 text-red-700' :
+              container.channel.toLowerCase() === 'yellow' ? 'bg-amber-100 text-amber-700' :
+              container.channel.toLowerCase() === 'green' ? 'bg-green-100 text-green-700' :
+              container.channel.toLowerCase() === 'blue' ? 'bg-blue-100 text-blue-700' :
+              'bg-gray-100 text-gray-700'
+            ]">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
+                <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
+                <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
+              </svg>
+              Channel {{ container.channel }}
+            </div>
+          </div>
+        </div>
       </div>
-    </CardFooter>
+      
+      <!-- Right Column for Action Buttons -->
+      <div class="flex flex-col justify-center flex-shrink-0 w-56 p-6 border-l border-gray-100 bg-gray-50">
+        <div class="flex flex-col gap-3">
+          <button 
+            @click="handleViewTimeline"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              width="15" 
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <path d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Track
+          </button>
+          
+          <ButtonComponent
+            variant="custom"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-blue-700 transition-colors border border-transparent rounded-md shadow-sm bg-blue-50 hover:bg-blue-100"
+            @click="handleViewDetails"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"></path>
+            </svg>
+            Details
+          </ButtonComponent>
+        </div>
+      </div>
+    </div>
   </Card>
-</template> 
+</template>
+
+<style scoped>
+/* Add any additional styles here */
+.status-bg-submitted {
+  background-color: rgb(254, 243, 199);
+  color: rgb(133, 77, 14);
+}
+
+.status-bg-review {
+  background-color: rgb(224, 242, 254);
+  color: rgb(2, 132, 199);
+}
+
+.status-bg-paid {
+  background-color: rgb(220, 252, 231);
+  color: rgb(22, 163, 74);
+}
+
+.status-bg-error {
+  background-color: rgb(254, 226, 226);
+  color: rgb(220, 38, 38);
+}
+
+.status-bg-pending {
+  background-color: rgb(238, 242, 255);
+  color: rgb(79, 70, 229);
+}
+</style> 

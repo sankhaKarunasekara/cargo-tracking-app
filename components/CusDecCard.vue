@@ -3,13 +3,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card'
 import ButtonComponent from './ui/button/index'
 import StatusTimelineButton from './StatusTimelineButton.vue'
 import { ref, computed } from 'vue'
-import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
+import { AnonymizedCusDecRecord, AnonymizedContainer, yardLocationColors, YardLocations } from '../lib/data/anonymizedCusDecData'
+import { mapCusDecStatusToYardLocation } from '../lib/data'
 import { useRouter } from 'vue-router'
 
 // Add additional type information to support the component properties
 interface ExtendedCusDecRecord extends AnonymizedCusDecRecord {
   countryOfExport?: string;
-  destination?: string;
+  containers?: AnonymizedContainer[];
 }
 
 // Define the props
@@ -22,7 +23,7 @@ const router = useRouter();
 
 // Define the emits
 const emit = defineEmits<{
-  'view-details': [cusdec: ExtendedCusDecRecord];
+  'view-details': [cusdec: ExtendedCusDecRecord]; 
   'view-timeline': [cusdec: ExtendedCusDecRecord];
   'acknowledge': [cusdec: ExtendedCusDecRecord];
 }>();
@@ -43,13 +44,26 @@ const handleAcknowledge = () => {
   emit('acknowledge', props.cusdec);
 };
 
+// Method to handle view containers click
+const handleViewContainers = () => {
+  router.push(`/ContainerTracking?cusdec=${encodeURIComponent(props.cusdec.cusdecNumber)}`);
+};
+
 // Get default office code if not provided
 const officeCode = computed(() => {
   return props.cusdec.officeCode || 'CBHQ1';
 });
 
-// Get default channel if not provided
-const channel = computed(() => {
+// Get BL number with fallback
+const blNumber = computed(() => {
+  return props.cusdec.blNumber || 'BL-000000000';
+});
+
+// Get container channel if available
+const containerChannel = computed(() => {
+  if (props.cusdec.containers && props.cusdec.containers.length > 0) {
+    return props.cusdec.containers[0].channel;
+  }
   return props.cusdec.channel?.toLowerCase() || 'green';
 });
 
@@ -72,36 +86,62 @@ const containerCount = computed(() => {
 
 // Get country of export with default
 const countryOfExport = computed(() => {
-  return props.cusdec.countryOfExport || 'Singapore';
+  return props.cusdec.originCountry || 'Singapore';
 });
 
-// Get destination with default
-const destination = computed(() => {
-  return props.cusdec.destination || 'Sri Lanka';
+// Get yard location based on status
+const yardLocation = computed(() => {
+  return mapCusDecStatusToYardLocation(props.cusdec.status);
+});
+
+// Get the color styling for a yard location
+const getYardLocationColor = computed(() => {
+  const location = yardLocation.value;
+  
+  if (location in yardLocationColors) {
+    return {
+      bg: yardLocationColors[location].bg,
+      text: yardLocationColors[location].text,
+      border: yardLocationColors[location].border
+    };
+  }
+  
+  // Default styling if location not found
+  return {
+    bg: 'bg-indigo-50',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200'
+  };
 });
 
 // Get channel color based on channel value
 const getChannelColor = computed(() => {
-  switch (channel.value) {
+  const channelValue = containerChannel.value;
+  
+  switch (channelValue) {
     case 'red':
+    case 'Red':
       return {
         bg: 'bg-red-100',
         text: 'text-red-700',
         border: 'border-red-200'
       }
     case 'yellow':
+    case 'Yellow':
       return {
         bg: 'bg-amber-100',
         text: 'text-amber-700',
         border: 'border-amber-200'
       }
     case 'green':
+    case 'Green':
       return {
         bg: 'bg-green-100',
         text: 'text-green-700',
         border: 'border-green-200'
       }
     case 'blue':
+    case 'Blue':
       return {
         bg: 'bg-blue-100',
         text: 'text-blue-700',
@@ -169,9 +209,9 @@ const features = {
     <div class="lg:hidden">
       <!-- Card Header -->
       <div class="p-6 pb-4">
-        <div class="flex items-start justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
           <!-- Left: Document icon and CusDec number -->
-          <div class="flex items-start min-w-0">
+          <div class="flex items-end min-w-0">
             <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 rounded-md bg-blue-50">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -184,7 +224,7 @@ const features = {
             <div class="min-w-0">
               <h3 class="text-base font-semibold text-gray-900 truncate">{{ cusdec.cusdecNumber }}</h3>
               <div class="flex items-center mt-1 text-xs text-gray-500">
-                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ officeCode }}</span>
+                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded font-medium">{{ blNumber }}</span>
                 <span class="mx-1.5">•</span>
                 <span>{{ formattedDate }}</span>
               </div>
@@ -237,15 +277,22 @@ const features = {
           </div>
         </div>
         
-        <!-- Channel and Destination (bottom of content) -->
+        <!-- Update the mobile view: Yard/Destination and Channel -->
         <div class="flex flex-wrap items-center gap-2 mt-4">
-          <!-- Destination -->
-          <div class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium whitespace-nowrap">
+          <!-- Yard Location -->
+          <div 
+            :class="[
+              'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
+              getYardLocationColor.bg,
+              getYardLocationColor.text,
+              getYardLocationColor.border
+            ]"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            {{ destination }}
+            {{ yardLocation }}
           </div>
           
           <!-- Channel - shown only if not "Waiting Confirmation" -->
@@ -257,12 +304,7 @@ const features = {
               getChannelColor.text
             ]"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
-              <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
-              <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
-            </svg>
-            Channel {{ channel.toUpperCase() }}
+             {{ containerChannel.toUpperCase() }}
           </div>
         </div>
       </div>
@@ -297,6 +339,19 @@ const features = {
             Track
           </button>
           
+          <!-- View Containers Button -->
+          <button
+            @click="handleViewContainers"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium transition-colors rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <rect x="1" y="3" width="15" height="13" rx="1"></rect>
+              <path d="M16 8h4l3 5v5a1 1 0 0 1-1 1h-1"></path>
+              <path d="M16 16h-4a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h4"></path>
+            </svg>
+            Containers
+          </button>
+          
           <ButtonComponent
             variant="custom"
             class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -315,9 +370,9 @@ const features = {
     <!-- Desktop Card Layout (display only on large screens) -->
     <div class="hidden lg:flex">
       <div class="flex-grow min-w-0 p-6">
-        <div class="flex items-start gap-4">
+        <div class="flex items-center justify-between gap-4">
           <!-- Left: Document icon and CusDec number -->
-          <div class="flex items-start min-w-0">
+          <div class="flex items-end min-w-0">
             <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 rounded-md bg-blue-50">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -330,15 +385,15 @@ const features = {
             <div class="min-w-0">
               <h3 class="text-base font-semibold text-gray-900 truncate">{{ cusdec.cusdecNumber }}</h3>
               <div class="flex items-center mt-1 text-xs text-gray-500">
-                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded font-medium">{{ officeCode }}</span>
+                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded font-medium">{{ blNumber }}</span>
                 <span class="mx-1.5">•</span>
                 <span>{{ formattedDate }}</span>
               </div>
             </div>
           </div>
           
-          <!-- Status badge -->
-          <div :class="['px-3 py-1 text-xs font-medium rounded-full flex-shrink-0 whitespace-nowrap', getStatusColor()]">
+          <!-- Status badge - placed here and right-aligned -->
+          <div :class="['px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap', getStatusColor()]">
             {{ cusdec.status }}
           </div>
         </div>
@@ -376,15 +431,22 @@ const features = {
             </div>
           </div>
           
-          <!-- Channel and Destination (bottom of content) -->
+          <!-- Update the desktop view: Yard/Destination and Channel -->
           <div class="flex flex-wrap items-center gap-2 mt-4">
-            <!-- Destination -->
-            <div class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <!-- Yard Location -->
+            <div 
+              :class="[
+                'inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap',
+                getYardLocationColor.bg,
+                getYardLocationColor.text,
+                getYardLocationColor.border
+              ]"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              {{ destination }}
+              {{ yardLocation }}
             </div>
             
             <!-- Channel - shown only if not "Waiting Confirmation" -->
@@ -396,12 +458,7 @@ const features = {
                 getChannelColor.text
               ]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
-                <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
-                <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
-              </svg>
-              Channel {{ channel.toUpperCase() }}
+            {{ containerChannel.toUpperCase() }}
             </div>
           </div>
         </div>
@@ -455,7 +512,31 @@ const features = {
               <path d="M12 8v4l3 3"></path>
               <circle cx="12" cy="12" r="10"></circle>
             </svg>
-            Timeline
+            Track
+          </button>
+          
+          <!-- View Containers Button -->
+          <button
+            @click="handleViewContainers"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              width="15" 
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <rect x="1" y="3" width="15" height="13" rx="1"></rect>
+              <path d="M16 8h4l3 5v5a1 1 0 0 1-1 1h-1"></path>
+              <path d="M16 16h-4a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h4"></path>
+            </svg>
+            Containers
           </button>
           
           <ButtonComponent

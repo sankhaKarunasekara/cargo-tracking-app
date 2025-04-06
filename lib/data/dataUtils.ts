@@ -4,9 +4,21 @@ import {
   AnonymizedCusDecRecord, 
   AnonymizedContainer 
 } from './anonymizedCusDecData';
+import { ContainerPass, containerPassData } from './containerPassData';
+import { ContainerTrackingEvent, containerTrackingEvents, containerTrackingData } from './containerTrackingData';
+import { CargoItem, cargoItemsData } from './cargoItemsData';
 
 // Re-export types for better organization
-export type { AnonymizedCusDecRecord, AnonymizedContainer };
+export type { 
+  AnonymizedCusDecRecord, 
+  AnonymizedContainer,
+  ContainerPass,
+  ContainerTrackingEvent,
+  CargoItem 
+};
+
+// Also export the lookup data objects
+export { containerTrackingData };
 
 /**
  * Get all CusDec data
@@ -101,16 +113,83 @@ export function filterCusDecs(criteria: {
 }
 
 /**
+ * Helper function to get CusDecId by CusDecNumber
+ */
+export function getCusDecIdByNumber(cusdecNumber: string): string | undefined {
+  const cusdec = anonymizedCusDecData.find(
+    record => record.cusdecNumber === cusdecNumber
+  );
+  return cusdec?.id;
+}
+
+/**
+ * Helper function to get containers by CusDecNumber
+ */
+export function getContainersByCusDecNumber(cusdecNumber: string): AnonymizedContainer[] {
+  const cusdecId = getCusDecIdByNumber(cusdecNumber);
+  if (!cusdecId) return [];
+  
+  return anonymizedContainers.filter(container => {
+    // Check if the cusdecId in the container matches either the full ID or just the numeric part
+    const numericCusdecId = cusdecId.replace('CUS-', '');
+    const containerCusdecIdMatch = container.cusdecId.includes(numericCusdecId) || 
+                                  container.cusdecId === cusdecId;
+    return containerCusdecIdMatch;
+  });
+}
+
+/**
  * Filter containers based on criteria
  */
 export function filterContainers(criteria: {
   containerNumber?: string;
   location?: string;
   status?: string;
+  channel?: string;
   cusdecId?: string;
+  cusdecNumber?: string;
   startDate?: string;
   endDate?: string;
 }): AnonymizedContainer[] {
+  // If cusdecNumber is provided, use it to find matching containers directly
+  if (criteria.cusdecNumber) {
+    const matchedByNumber = getContainersByCusDecNumber(criteria.cusdecNumber);
+    if (matchedByNumber.length > 0) {
+      // Apply remaining filters to the matched containers
+      return matchedByNumber.filter(container => {
+        // Apply remaining filters
+        if (criteria.containerNumber && !container.number.toLowerCase().includes(criteria.containerNumber.toLowerCase())) {
+          return false;
+        }
+        
+        if (criteria.location && !container.location.toLowerCase().includes(criteria.location.toLowerCase())) {
+          return false;
+        }
+        
+        if (criteria.status && container.status.toLowerCase() !== criteria.status.toLowerCase()) {
+          return false;
+        }
+        
+        if (criteria.channel && container.channel !== criteria.channel) {
+          return false;
+        }
+        
+        if (criteria.startDate && criteria.endDate) {
+          const containerDate = new Date(container.lastUpdated);
+          const startDate = new Date(criteria.startDate);
+          const endDate = new Date(criteria.endDate);
+          
+          if (containerDate < startDate || containerDate > endDate) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+    }
+  }
+  
+  // Continue with regular filtering if no cusdecNumber is provided or no matches were found
   return anonymizedContainers.filter(container => {
     // Filter by container number if provided
     if (criteria.containerNumber && !container.number.toLowerCase().includes(criteria.containerNumber.toLowerCase())) {
@@ -124,6 +203,11 @@ export function filterContainers(criteria: {
     
     // Filter by status if provided
     if (criteria.status && container.status.toLowerCase() !== criteria.status.toLowerCase()) {
+      return false;
+    }
+    
+    // Filter by channel if provided
+    if (criteria.channel && container.channel !== criteria.channel) {
       return false;
     }
     
@@ -334,118 +418,43 @@ export function generateCusDecTimeline(cusdecId: string) {
 }
 
 /**
- * Generate timeline events for a Container
+ * Get container pass data for a specific container number
  */
-export function generateContainerTimeline(containerId: string) {
-  const container = getContainerById(containerId);
-  if (!container) return [];
+export function getContainerPassByNumber(containerNumber: string): ContainerPass[] {
+  return containerPassData.filter(pass => pass.containerNumber === containerNumber);
+}
+
+/**
+ * Get container tracking events for a specific container number
+ */
+export function getContainerTrackingByNumber(containerNumber: string): ContainerTrackingEvent[] {
+  return containerTrackingData[containerNumber] || [];
+}
+
+/**
+ * Get cargo items for a specific cusdec ID
+ */
+export function getCargoItemsByCusDecId(cusdecId: string): CargoItem[] {
+  return cargoItemsData.filter(item => item.instanceId === cusdecId);
+}
+
+/**
+ * Generate container timeline using tracking events
+ */
+export function generateContainerTimeline(containerNumber: string) {
+  const events = getContainerTrackingByNumber(containerNumber);
   
-  const timeline = [];
-  
-  // Arrival event
-  if (container.arrivalDate) {
-    timeline.push({
-      date: container.arrivalDate,
-      title: 'Container Arrived',
-      description: `Container ${container.number} arrived on vessel ${container.vesselName}`,
-      status: 'completed'
-    });
+  if (events.length === 0) {
+    return [];
   }
   
-  // Define dates here to fix scope issues
-  const scanningDate = new Date(container.arrivalDate);
-  scanningDate.setHours(scanningDate.getHours() + 24);
-  
-  const checkedDate = new Date(container.arrivalDate);
-  checkedDate.setHours(checkedDate.getHours() + 36);
-  
-  // Status events based on current status
-  switch (container.status.toLowerCase()) {
-    case 'waiting confirmation':
-      timeline.push({
-        date: container.lastUpdated,
-        title: 'Waiting Confirmation',
-        description: 'Awaiting document verification',
-        status: 'current'
-      });
-      break;
-      
-    case 'scanning':
-      timeline.push({
-        date: scanningDate.toISOString().split('T')[0],
-        title: 'Scanning in Progress',
-        description: 'Container selected for scanning',
-        status: 'current'
-      });
-      break;
-      
-    case 'officer checked':
-      timeline.push({
-        date: scanningDate.toISOString().split('T')[0],
-        title: 'Scanning Completed',
-        description: 'Container scanning completed',
-        status: 'completed'
-      });
-      
-      timeline.push({
-        date: checkedDate.toISOString().split('T')[0],
-        title: 'Officer Checked',
-        description: 'Physical inspection by customs officer completed',
-        status: 'current'
-      });
-      break;
-      
-    case 'detained':
-      const detainedDate = new Date(container.arrivalDate);
-      detainedDate.setHours(detainedDate.getHours() + 48);
-      
-      timeline.push({
-        date: scanningDate.toISOString().split('T')[0],
-        title: 'Scanning Completed',
-        description: 'Container scanning completed',
-        status: 'completed'
-      });
-      
-      timeline.push({
-        date: checkedDate.toISOString().split('T')[0],
-        title: 'Officer Checked',
-        description: 'Physical inspection by customs officer completed',
-        status: 'completed'
-      });
-      
-      timeline.push({
-        date: detainedDate.toISOString().split('T')[0],
-        title: 'Detained',
-        description: 'Container detained for further inspection',
-        status: 'current'
-      });
-      break;
-      
-    case 'released':
-      const releasedDate = new Date(container.lastUpdated);
-      
-      timeline.push({
-        date: scanningDate.toISOString().split('T')[0],
-        title: 'Scanning Completed',
-        description: 'Container scanning completed',
-        status: 'completed'
-      });
-      
-      timeline.push({
-        date: checkedDate.toISOString().split('T')[0],
-        title: 'Officer Checked',
-        description: 'Physical inspection by customs officer completed',
-        status: 'completed'
-      });
-      
-      timeline.push({
-        date: releasedDate.toISOString().split('T')[0],
-        title: 'Released',
-        description: 'Container cleared for release',
-        status: 'completed'
-      });
-      break;
-  }
-  
-  return timeline.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  return events.map(event => ({
+    date: event.operationDateTime,
+    title: event.operationName,
+    description: `Container ${event.containerNumber} - Destination: ${event.destination}`,
+    status: 'completed',
+    scanned: event.scanned === 1
+  })).sort((a, b) => {
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
 } 

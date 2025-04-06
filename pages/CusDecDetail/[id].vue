@@ -114,15 +114,9 @@ onMounted(() => {
               </div>
               
               <!-- Channel and Container Stats -->
-              <div class="pt-3 mt-3 space-y-2 border-t border-gray-100 text-sm">
+              <div class="pt-3 mt-3 space-y-2 text-sm border-t border-gray-100">
                 <div class="flex">
-                  <span class="w-24 text-gray-500">Channel:</span>
                   <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3"></path>
-                      <path d="M3 13h3a2 2 0 0 1 2 2v3"></path>
-                      <path d="M16 13h3a2 2 0 0 1 2 2v3"></path>
-                    </svg>
                     {{ cusdec.channel.toUpperCase() }}
                   </span>
                 </div>
