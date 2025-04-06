@@ -20,6 +20,7 @@ interface _GlobalComponents {
     'FilterSection': typeof import("../components/FilterSection.vue")['default']
     'ItemDetailsSheet': typeof import("../components/ItemDetailsSheet.vue")['default']
     'Navbar': typeof import("../components/Navbar.vue")['default']
+    'PwaInstall': typeof import("../components/PwaInstall.vue")['default']
     'StatusTimeline': typeof import("../components/StatusTimeline.vue")['default']
     'StatusTimelineButton': typeof import("../components/StatusTimelineButton.vue")['default']
     'StatusTimelineSheet': typeof import("../components/StatusTimelineSheet.vue")['default']
@@ -79,6 +80,14 @@ interface _GlobalComponents {
     'TabsContent': typeof import("../components/ui/tabs/index")['TabsContent']
     'Timeline': typeof import("../components/ui/timeline/index")['Timeline']
     'TimelineItem': typeof import("../components/ui/timeline/index")['TimelineItem']
+    'VitePwaManifest': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']
+    'NuxtPwaManifest': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']
+    'NuxtPwaAssets': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/NuxtPwaAssets")['default']
+    'PwaAppleImage': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleImage.vue")['default']
+    'PwaAppleSplashScreenImage': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleSplashScreenImage.vue")['default']
+    'PwaFaviconImage': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaFaviconImage.vue")['default']
+    'PwaMaskableImage': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaMaskableImage.vue")['default']
+    'PwaTransparentImage': typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaTransparentImage.vue")['default']
     'NuxtPage': typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']
     'NoScript': typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['NoScript']
     'Link': typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -99,6 +108,7 @@ interface _GlobalComponents {
     'LazyFilterSection': LazyComponent<typeof import("../components/FilterSection.vue")['default']>
     'LazyItemDetailsSheet': LazyComponent<typeof import("../components/ItemDetailsSheet.vue")['default']>
     'LazyNavbar': LazyComponent<typeof import("../components/Navbar.vue")['default']>
+    'LazyPwaInstall': LazyComponent<typeof import("../components/PwaInstall.vue")['default']>
     'LazyStatusTimeline': LazyComponent<typeof import("../components/StatusTimeline.vue")['default']>
     'LazyStatusTimelineButton': LazyComponent<typeof import("../components/StatusTimelineButton.vue")['default']>
     'LazyStatusTimelineSheet': LazyComponent<typeof import("../components/StatusTimelineSheet.vue")['default']>
@@ -158,6 +168,14 @@ interface _GlobalComponents {
     'LazyTabsContent': LazyComponent<typeof import("../components/ui/tabs/index")['TabsContent']>
     'LazyTimeline': LazyComponent<typeof import("../components/ui/timeline/index")['Timeline']>
     'LazyTimelineItem': LazyComponent<typeof import("../components/ui/timeline/index")['TimelineItem']>
+    'LazyVitePwaManifest': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']>
+    'LazyNuxtPwaManifest': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']>
+    'LazyNuxtPwaAssets': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/NuxtPwaAssets")['default']>
+    'LazyPwaAppleImage': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleImage.vue")['default']>
+    'LazyPwaAppleSplashScreenImage': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleSplashScreenImage.vue")['default']>
+    'LazyPwaFaviconImage': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaFaviconImage.vue")['default']>
+    'LazyPwaMaskableImage': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaMaskableImage.vue")['default']>
+    'LazyPwaTransparentImage': LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaTransparentImage.vue")['default']>
     'LazyNuxtPage': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']>
     'LazyNoScript': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['NoScript']>
     'LazyLink': LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['Link']>
@@ -184,6 +202,7 @@ export const CusDecCard: typeof import("../components/CusDecCard.vue")['default'
 export const FilterSection: typeof import("../components/FilterSection.vue")['default']
 export const ItemDetailsSheet: typeof import("../components/ItemDetailsSheet.vue")['default']
 export const Navbar: typeof import("../components/Navbar.vue")['default']
+export const PwaInstall: typeof import("../components/PwaInstall.vue")['default']
 export const StatusTimeline: typeof import("../components/StatusTimeline.vue")['default']
 export const StatusTimelineButton: typeof import("../components/StatusTimelineButton.vue")['default']
 export const StatusTimelineSheet: typeof import("../components/StatusTimelineSheet.vue")['default']
@@ -243,6 +262,14 @@ export const TabsTrigger: typeof import("../components/ui/tabs/index")['TabsTrig
 export const TabsContent: typeof import("../components/ui/tabs/index")['TabsContent']
 export const Timeline: typeof import("../components/ui/timeline/index")['Timeline']
 export const TimelineItem: typeof import("../components/ui/timeline/index")['TimelineItem']
+export const VitePwaManifest: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']
+export const NuxtPwaManifest: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']
+export const NuxtPwaAssets: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/NuxtPwaAssets")['default']
+export const PwaAppleImage: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleImage.vue")['default']
+export const PwaAppleSplashScreenImage: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleSplashScreenImage.vue")['default']
+export const PwaFaviconImage: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaFaviconImage.vue")['default']
+export const PwaMaskableImage: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaMaskableImage.vue")['default']
+export const PwaTransparentImage: typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaTransparentImage.vue")['default']
 export const NuxtPage: typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']
 export const NoScript: typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['NoScript']
 export const Link: typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -263,6 +290,7 @@ export const LazyCusDecCard: LazyComponent<typeof import("../components/CusDecCa
 export const LazyFilterSection: LazyComponent<typeof import("../components/FilterSection.vue")['default']>
 export const LazyItemDetailsSheet: LazyComponent<typeof import("../components/ItemDetailsSheet.vue")['default']>
 export const LazyNavbar: LazyComponent<typeof import("../components/Navbar.vue")['default']>
+export const LazyPwaInstall: LazyComponent<typeof import("../components/PwaInstall.vue")['default']>
 export const LazyStatusTimeline: LazyComponent<typeof import("../components/StatusTimeline.vue")['default']>
 export const LazyStatusTimelineButton: LazyComponent<typeof import("../components/StatusTimelineButton.vue")['default']>
 export const LazyStatusTimelineSheet: LazyComponent<typeof import("../components/StatusTimelineSheet.vue")['default']>
@@ -322,6 +350,14 @@ export const LazyTabsTrigger: LazyComponent<typeof import("../components/ui/tabs
 export const LazyTabsContent: LazyComponent<typeof import("../components/ui/tabs/index")['TabsContent']>
 export const LazyTimeline: LazyComponent<typeof import("../components/ui/timeline/index")['Timeline']>
 export const LazyTimelineItem: LazyComponent<typeof import("../components/ui/timeline/index")['TimelineItem']>
+export const LazyVitePwaManifest: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']>
+export const LazyNuxtPwaManifest: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/VitePwaManifest")['default']>
+export const LazyNuxtPwaAssets: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/NuxtPwaAssets")['default']>
+export const LazyPwaAppleImage: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleImage.vue")['default']>
+export const LazyPwaAppleSplashScreenImage: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaAppleSplashScreenImage.vue")['default']>
+export const LazyPwaFaviconImage: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaFaviconImage.vue")['default']>
+export const LazyPwaMaskableImage: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaMaskableImage.vue")['default']>
+export const LazyPwaTransparentImage: LazyComponent<typeof import("../node_modules/.pnpm/@vite-pwa+nuxt@1.0.0_magica_73f940cca9de3d2cb326131589954c17/node_modules/@vite-pwa/nuxt/dist/runtime/components/PwaTransparentImage.vue")['default']>
 export const LazyNuxtPage: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/pages/runtime/page")['default']>
 export const LazyNoScript: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['NoScript']>
 export const LazyLink: LazyComponent<typeof import("../node_modules/.pnpm/nuxt@3.16.2_@parcel+watcher_0d0d00350215c53b49c3dd1375b02784/node_modules/nuxt/dist/head/runtime/components")['Link']>

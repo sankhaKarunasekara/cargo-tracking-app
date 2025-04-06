@@ -9,18 +9,21 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview"
+    "preview": "nuxt preview",
+    "build:pwa": "nuxt build && nuxt generate",
+    "generate:icons": "pwa-asset-generator ./public/logo.png ./public/icons --icon-only --opaque false --padding \"10%\" --type png"
   },
   "dependencies": {
     "@nuxt/image": "^1.10.0",
     "@vueuse/core": "^13.0.0",
+    "tailwindcss": "^4.0.0",
     "vue": "^3.4.10",
-    "vue-router": "^4.2.5",
-    "tailwindcss": "^4.0.0"
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@tailwindcss/vite": "^4.0.0",
+    "@vite-pwa/nuxt": "1.0.0",
     "nuxi": "^3.24.1",
     "nuxt": "^3.9.0",
     "shadcn-nuxt": "^0.1.0",

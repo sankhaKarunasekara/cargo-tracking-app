@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, inject } from 'vue'
 import Navbar from '../components/Navbar.vue'
 import AppSidebar from '../components/AppSidebar.vue'
+import PwaInstall from '../components/PwaInstall.vue'
 import { SidebarProvider, useSidebar } from '../components/ui/sidebar'
 
 // Simple device detection
@@ -68,6 +69,9 @@ onUnmounted(() => {
           <slot />
         </main>
       </div>
+      
+      <!-- PWA Install Button -->
+      <PwaInstall />
     </div>
   </SidebarProvider>
 </template>
