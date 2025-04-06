@@ -36,16 +36,24 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen overflow-hidden">
-    <SidebarProvider>
-      <Navbar @toggle-filters="handleToggleFilters" />
+  <SidebarProvider>
+    <!-- Desktop sidebar -->
+    <AppSidebar v-if="!isMobile && showDesktopSidebar" />
+    
+    <!-- Main content area with Navbar -->
+    <div class="h-screen" :class="{ 'md:pl-64': !isMobile && showDesktopSidebar }">
+      <Navbar 
+        @toggle-filters="handleToggleFilters" 
+        @toggle-desktop-sidebar="toggleDesktopSidebar"
+        :show-desktop-sidebar="showDesktopSidebar" 
+      />
       
-      <div class="flex flex-1 overflow-hidden relative">
+      <div class="relative overflow-hidden flex-1">
         <!-- Sidebar toggle button for desktop when sidebar is hidden -->
         <button
           v-if="!isMobile && !showDesktopSidebar"
           @click="toggleDesktopSidebar"
-          class="absolute left-0 top-4 z-20 bg-white shadow-md rounded-r-lg p-2"
+          class="fixed left-0 top-20 z-20 bg-white shadow-md rounded-r-lg p-2"
           aria-label="Show sidebar"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
@@ -56,27 +64,12 @@ onUnmounted(() => {
           </svg>
         </button>
         
-        <!-- Desktop sidebar -->
-        <AppSidebar v-if="!isMobile && showDesktopSidebar" class="relative">
-          <!-- Hide sidebar button -->
-          <button
-            @click="toggleDesktopSidebar"
-            class="absolute right-0 top-4 z-20 bg-white shadow-md rounded-l-lg p-2 -mr-3"
-            aria-label="Hide sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
-              <path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11"></path>
-              <path d="m10 17-5-5 5-5"></path>
-            </svg>
-          </button>
-        </AppSidebar>
-        
-        <main class="flex-1 min-w-0 h-full overflow-y-auto pb-16 md:pb-0">
+        <main class="h-[calc(100vh-64px)] overflow-y-auto pb-16 md:pb-0">
           <slot />
         </main>
       </div>
-    </SidebarProvider>
-  </div>
+    </div>
+  </SidebarProvider>
 </template>
 
 <style>

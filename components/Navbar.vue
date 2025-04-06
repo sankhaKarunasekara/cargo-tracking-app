@@ -41,22 +41,60 @@
             </svg>
           </button>
           
-          <!-- Dynamic page title -->
-          <div class="flex items-center md:ml-4">
-            <h1 class="text-xl font-semibold text-gray-900">{{ currentPageTitle }}</h1>
+          <!-- Hide sidebar button (desktop only) -->
+          <button
+            v-if="!isMobile && showDesktopSidebar"
+            @click="$emit('toggle-desktop-sidebar')"
+            class="items-center justify-center hidden p-2 mr-2 text-gray-500 rounded-md md:inline-flex hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            aria-label="Hide sidebar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+              <path d="M16 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h11"></path>
+              <path d="m10 17-5-5 5-5"></path>
+            </svg>
+          </button>
+          
+          <!-- Logo and page title container -->
+          <div class="flex items-center">
+            <!-- Logo - only visible on mobile or when sidebar is hidden -->
+            <div class="flex items-center mr-3" v-if="!showDesktopSidebar || isMobile">
+              <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+                  <path d="M10 2a2 2 0 1 0 4 0"/>
+                </svg>
+              </div>
+              <span class="hidden ml-2 text-lg font-bold text-blue-600 sm:block">CargoTrack</span>
+            </div>
+            
+            <!-- Dynamic page title -->
+            <div class="items-center hidden md:flex" :class="{ 'pl-3 ml-3 border-l border-gray-200': !showDesktopSidebar || isMobile }">
+              <h1 class="text-xl font-semibold text-gray-900">{{ currentPageTitle }}</h1>
+            </div>
+            
+            <!-- Mobile only - small page title -->
+            <h1 class="text-base font-medium text-gray-900 md:hidden">{{ currentPageTitle }}</h1>
           </div>
         </div>
         
         <div class="flex items-center space-x-4">
-          <!-- Filter button (conditionally shown) -->
+          <!-- Filter button (conditionally shown) with improved mobile appearance -->
           <button 
             v-if="showFilterButton"
             @click="$emit('toggle-filters')"
-            class="flex items-center justify-center p-2 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+            class="flex items-center justify-center p-2 text-blue-600 transition-colors rounded-full bg-blue-50 hover:bg-blue-100"
             aria-label="Toggle filters"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+          </button>
+          
+          <!-- Notifications button -->
+          <button class="flex items-center justify-center p-2 transition-colors bg-gray-100 rounded-full hover:bg-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
             </svg>
           </button>
           
@@ -102,8 +140,8 @@
   <div class="fixed inset-0 z-40 md:hidden" v-show="showMobileSidebar">
     <!-- Backdrop with transition -->
     <div 
-      class="fixed inset-0 bg-black transition-opacity duration-300 ease-in-out"
-      :class="{ 'bg-opacity-50': showMobileSidebar, 'bg-opacity-0': !showMobileSidebar }"
+      class="fixed inset-0 transition-opacity duration-300 ease-in-out bg-black"
+      :class="{ 'bg-opacity-50 backdrop-blur-sm': showMobileSidebar, 'bg-opacity-0': !showMobileSidebar }"
       @click="closeSidebar"
     ></div>
     
@@ -114,12 +152,13 @@
     >
       <div class="flex items-center justify-between p-4 border-b border-gray-100">
         <div class="flex items-center space-x-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
-            <path d="M17 7l-3-3H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-3-3h-2z"></path>
-            <path d="M13 7V4"></path>
-            <polyline points="8 16 10 18 16 12"></polyline>
-          </svg>
-          <span class="text-lg font-semibold">Cargo Tracking</span>
+          <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+              <path d="M10 2a2 2 0 1 0 4 0"/>
+            </svg>
+          </div>
+          <span class="text-lg font-bold text-blue-600">CargoTrack</span>
         </div>
         <button 
           @click="closeSidebar" 
@@ -132,12 +171,12 @@
         </button>
       </div>
       
-      <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+      <div class="flex-1 p-4 overflow-y-auto custom-scrollbar">
         <ul class="space-y-2">
           <li v-for="item in navItems" :key="item.title">
             <a 
               @click="navigateTo(item.path)"
-              class="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"
+              class="flex items-center p-3 rounded-md cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-blue-50 text-blue-600': isActive(item.path) }"
             >
               <!-- Home Icon -->
@@ -228,13 +267,13 @@
       </div>
       
       <!-- Mobile sidebar footer -->
-      <div class="border-t border-gray-100 p-4">
-        <div class="flex items-center gap-2">
-          <div class="flex items-center justify-center w-8 h-8 font-semibold text-white bg-blue-500 rounded-full">
+      <div class="p-4 border-t border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 font-semibold text-white bg-blue-500 rounded-full">
             A
           </div>
-          <div class="text-sm">
-            <div class="font-medium text-gray-900">Admin</div>
+          <div>
+            <div class="font-medium text-gray-900">Admin User</div>
             <div class="text-xs text-gray-500">admin@example.com</div>
           </div>
         </div>
@@ -250,6 +289,25 @@ import { useSidebar } from './ui/sidebar'
 
 const router = useRouter()
 const route = useRoute()
+
+// Props to know if desktop sidebar is shown
+const props = defineProps({
+  showDesktopSidebar: {
+    type: Boolean,
+    default: true
+  }
+})
+
+// Define custom events
+const emit = defineEmits(['toggle-filters', 'toggle-desktop-sidebar'])
+
+// Mobile detection
+const isMobile = ref(false)
+
+// Check if the device is mobile
+const checkDevice = () => {
+  isMobile.value = window.innerWidth < 768
+}
 
 // Mobile sidebar state
 const showMobileSidebar = ref(false)
@@ -284,11 +342,6 @@ const navItems = [
     icon: 'FileText',
     path: '/CusDecTracking',
   },
-  {
-    title: 'CusDec Ownership',
-    icon: 'Shield',
-    path: '/CusDecOwnership',
-  }
 ]
 
 // Define page titles
@@ -296,7 +349,6 @@ const pageTitles: Record<string, string> = {
   '/': 'Cargo Tracker',
   '/ContainerTracking': 'Container Tracking',
   '/CusDecTracking': 'CusDec Tracking',
-  '/CusDecOwnership': 'CusDec Ownership',
   '/StatusTimelinePage': 'Status Timeline',
 }
 
@@ -371,12 +423,15 @@ const closeSidebar = () => {
   showMobileSidebar.value = false
 }
 
-// Setup ESC key to close menus and cleanup
+// Setup device detection, ESC key to close menus and cleanup
 onMounted(() => {
+  checkDevice()
+  window.addEventListener('resize', checkDevice)
   window.addEventListener('keydown', handleKeyDown)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', checkDevice)
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('click', handleOutsideClick)
 })

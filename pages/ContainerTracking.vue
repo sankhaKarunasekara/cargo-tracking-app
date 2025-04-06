@@ -4,7 +4,6 @@ import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
 import Pagination from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
 
 // Get window size and mobile status
@@ -239,16 +238,16 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen pb-20 bg-gray-50">
-    <div class="container px-0 mx-auto">
+    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
       <!-- Status Tabs -->
-      <div class="p-2 mt-4 overflow-x-auto bg-white rounded-lg shadow-sm">
-        <div class="flex space-x-1">
+      <div class="p-3 mt-6 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+        <div class="flex space-x-2">
           <button 
             v-for="tab in statusTabs" 
             :key="tab.id"
             @click="setActiveStatus(tab.id)"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              'px-4 py-2.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
               tab.active 
                 ? 'bg-blue-50 text-blue-600' 
                 : 'text-gray-600 hover:bg-gray-50'
@@ -259,38 +258,55 @@ onUnmounted(() => {
         </div>
       </div>
       
-      <Accordion v-model="showFilters" type="single" collapsible class="mt-4">
-        <AccordionItem value="filters">
-          <AccordionTrigger class="p-3 bg-white rounded-t-lg shadow-sm">
-            <div class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              <span>Advanced Filters</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <FilterSection
-              :filters="filters"
-              @update:filters="handleFilterUpdate"
-              @search="handleSearch"
-              @reset="handleReset"
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <!-- Simple filter toggle button -->
+      <div class="p-4 mb-5 bg-white rounded-lg shadow-sm">
+        <button 
+          @click="toggleFilters" 
+          class="flex items-center text-sm font-medium text-gray-700 focus:outline-none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          <span>Advanced Filters</span>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="18" 
+            height="18" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="ml-2 transition-transform" 
+            :class="{ 'rotate-180': showFilters }"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
       
-      <div class="mt-4">
+      <!-- Filters panel -->
+      <div v-if="showFilters" class="p-5 mb-5 bg-white rounded-lg shadow-sm">
+        <FilterSection
+          :filters="filters"
+          @update:filters="handleFilterUpdate"
+          @search="handleSearch"
+          @reset="handleReset"
+        />
+      </div>
+      
+      <div class="mt-5">
         <!-- Empty state -->
-        <div v-if="filteredContainers.length === 0" class="py-8 text-center text-gray-500 bg-white rounded-lg shadow-sm">
+        <div v-if="filteredContainers.length === 0" class="py-10 text-center text-gray-500 bg-white rounded-lg shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-400">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="8" y1="12" x2="16" y2="12"></line>
           </svg>
-          <p>No containers found matching your filters</p>
+          <p class="mb-4">No containers found matching your filters</p>
           <button 
             @click="handleReset" 
-            class="px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+            class="px-5 py-2.5 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
           >
             Reset Filters
           </button>
@@ -298,22 +314,23 @@ onUnmounted(() => {
         
         <div v-else>
           <!-- Results count -->
-          <div class="flex flex-col mb-4 space-y-2 md:flex-row md:items-center md:justify-between">
-            <p class="text-sm text-gray-500">Found {{ filteredContainers.length }} containers</p>
+          <div class="flex flex-col mb-5 md:flex-row md:items-center md:justify-between">
+            <p class="mb-2 text-sm text-gray-500 md:mb-0">Found {{ filteredContainers.length }} containers</p>
           </div>
           
           <!-- Container cards -->
-          <div class="w-full space-y-4">
+          <div class="w-full space-y-5">
             <ContainerCard
               v-for="container in paginatedContainers"
               :key="container.id"
               :container="container"
               @viewDetails="handleViewDetails"
+              class="mb-5"
             />
           </div>
           
           <!-- Pagination for desktop, Load More for mobile -->
-          <div class="flex justify-center mt-6">
+          <div class="flex justify-center mt-8">
             <!-- Pagination (desktop only) -->
             <div class="hidden md:block">
               <Pagination
@@ -328,7 +345,7 @@ onUnmounted(() => {
               v-if="hasMoreItems"
               @click="loadMoreItems"
               :disabled="isLoadingMore"
-              class="w-full px-4 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-md shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
+              class="w-full px-5 py-2.5 text-sm font-medium text-blue-600 border border-blue-300 rounded-md shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
             >
               <span v-if="isLoadingMore" class="flex items-center justify-center">
                 <svg class="w-4 h-4 mr-2 -ml-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

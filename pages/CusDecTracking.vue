@@ -97,30 +97,57 @@ const allCusDecs = ref<AnonymizedCusDecRecord[]>(getAllCusDecData())
 
 // Detail state
 const showDetails = ref(false)
+const selectedItem = ref<AnonymizedCusDecRecord | null>(null)
+
+// Sidebar and filter visibility state
+const showSidebar = ref(false)
 const showFilters = ref(false)
-// Only show sidebar by default on desktop, hide on mobile initially
-const showSidebar = ref(false) 
 
 // Set sidebar visibility based on screen size
 onMounted(() => {
   // Check if screen is larger than mobile (md breakpoint)
-  const isDesktop = window.innerWidth >= 1200
+  const isDesktop = window.innerWidth >= 768
+  
+  // For mobile view, always start with sidebar hidden
   showSidebar.value = isDesktop
   
   // Add resize listener to update sidebar visibility
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 1200) {
+  const handleResize = () => {
+    if (window.innerWidth >= 768) {
+      // For desktop, always show the sidebar in the UI (but not the mobile panel)
       showSidebar.value = true
-    } else {
-      showSidebar.value = false
     }
-  })
+  }
+  
+  window.addEventListener('resize', handleResize)
   
   // Debug data loading
-  console.log("Component mounted with data:", allCusDecs.value.length, "records");
-  console.log("First few records:", allCusDecs.value.slice(0, 3));
-  console.log("Sample statuses:", [...new Set(allCusDecs.value.map(r => r.status))]);
+  console.log("Component mounted with data:", allCusDecs.value.length, "records")
+  
+  // Set up document listener for filter toggle events from navbar
+  document.addEventListener('toggle-filters', toggleFilters)
+  
+  return () => {
+    window.removeEventListener('resize', handleResize)
+    document.removeEventListener('toggle-filters', toggleFilters)
+  }
 })
+
+// Toggle sidebar function
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value
+}
+
+// Toggle filters function (for navbar integration)
+const toggleFilters = () => {
+  // On mobile, toggle the filters panel visibility
+  if (isMobile.value) {
+    showSidebar.value = !showSidebar.value
+  }
+}
+
+// Provide the toggle function to allow other components to toggle filters
+provide('toggleFilters', toggleFilters)
 
 // Define cusdec stats
 const cusDecStats = calculateCusDecStats()
@@ -139,19 +166,49 @@ const mapStatusToProcessingStage = (status: string): string => {
   }
 }
 
+// Handle filter update
+const handleFilterUpdate = (updatedFilters: Filter[]) => {
+  filters.value = updatedFilters
+}
+
+// Update date range
+const updateDateRange = (start: string, end: string) => {
+  dateRange.value.startDate = start
+  dateRange.value.endDate = end
+}
+
+// Handle search button click
+const handleSearch = () => {
+  // Reset pagination
+  currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
+  
+  // On mobile, close the filters panel after search
+  if (isMobile.value) {
+    showSidebar.value = false
+  }
+}
+
+// Handle reset
+const handleReset = () => {
+  // Reset all filters
+  filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
+  
+  // Reset date range
+  dateRange.value = getLastMonthDateRange()
+  
+  // Reset pagination
+  currentPage.value = 1
+  displayedItemsCount.value = itemsPerPage
+}
+
 // Filter CusDecs based on filters, active status, and date range
 const filteredCusDecs = computed(() => {
-  // Debug logs
-  console.log("Date range:", dateRange.value);
-  console.log("Active status filter:", activeStatusFilter.value);
-  console.log("Filters:", filters.value.map(f => `${f.id}: ${f.value}`).join(', '));
-  
   // First get data filtered by basic criteria
   let filtered = filterCusDecs({
     cusdecNumber: filters.value.find(f => f.id === 'cusdecNumber')?.value,
     declarantTIN: filters.value.find(f => f.id === 'declarantTIN')?.value,
     consigneeTIN: filters.value.find(f => f.id === 'consigneeTIN')?.value,
-    // Don't filter by status here - we'll do that below
     startDate: dateRange.value.startDate,
     endDate: dateRange.value.endDate
   });
@@ -162,8 +219,6 @@ const filteredCusDecs = computed(() => {
       return mapStatusToProcessingStage(record.status).toLowerCase() === activeStatusFilter.value.toLowerCase();
     });
   }
-  
-  console.log(`Filtered results: ${filtered.length} records`);
   
   // Sort results to prioritize "Processing" items if in "All" tab
   if (activeStatusFilter.value === 'all') {
@@ -189,9 +244,9 @@ const paginatedCusDecs = computed(() => {
   
   // For desktop view - use pagination
   if (!isMobile.value) {
-    const start = (currentPage.value - 1) * itemsPerPage
-    const end = start + itemsPerPage
-    return filteredCusDecs.value.slice(start, end)
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredCusDecs.value.slice(start, end)
   }
   // For mobile view - use "load more" approach
   return filteredCusDecs.value.slice(0, displayedItemsCount.value)
@@ -221,30 +276,9 @@ const handlePageChange = (page: number) => {
   currentPage.value = page
 }
 
-// Handle search
-const handleSearch = () => {
-  currentPage.value = 1
-  displayedItemsCount.value = itemsPerPage
-}
-
-// Handle filter update
-const handleFilterUpdate = (updatedFilters: Filter[]) => {
-  filters.value = updatedFilters
-}
-
-// Update date range
-const updateDateRange = (start: string, end: string) => {
-  dateRange.value = {
-    startDate: start,
-    endDate: end
-  }
-  currentPage.value = 1
-  displayedItemsCount.value = itemsPerPage
-}
-
 // Handle view details
 const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
-  cusDecDetails.value = cusdec;
+  selectedItem.value = cusdec;
   showDetails.value = true;
 }
 
@@ -252,29 +286,6 @@ const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
 const handleCloseDetails = () => {
   showDetails.value = false
 }
-
-// Toggle filters visibility
-const toggleFilters = () => {
-  showFilters.value = !showFilters.value
-}
-
-// Toggle sidebar visibility
-const toggleSidebar = () => {
-  showSidebar.value = !showSidebar.value
-}
-
-// Handle reset
-const handleReset = () => {
-  filters.value = filters.value.map(filter => ({ ...filter, value: '' }))
-  dateRange.value = getLastMonthDateRange()
-  currentPage.value = 1
-  displayedItemsCount.value = itemsPerPage
-}
-
-// Define details for display
-const cusDecDetails = ref<AnonymizedCusDecRecord | null>(null);
-
-const router = useRouter()
 
 // Add table headers for desktop view
 const tableHeaders = [
@@ -313,57 +324,180 @@ const formatDate = (dateString: string) => {
     day: 'numeric'
   });
 };
-
-// Provide the toggleSidebar function to the navbar
-provide('toggleFilters', toggleSidebar)
-
-// Listen for toggle-filters event from navbar
-onMounted(() => {
-  document.addEventListener('toggle-filters', () => toggleSidebar())
-})
-
-// Cleanup event listener
-onUnmounted(() => {
-  document.removeEventListener('toggle-filters', () => toggleSidebar())
-})
 </script>
 
 <template>
   <div class="min-h-screen pb-20 bg-gray-50">
-    <div class="container px-0 mx-auto">
-      <div class="flex flex-col mt-4 md:flex-row">
-        <!-- Side Panel with filters (always visible on desktop, togglable on mobile) -->
-        <div 
-          :class="[
-            'transform transition-all duration-300 ease-in-out',
-            showSidebar ? 'block' : 'hidden md:block',
-            'md:w-80 w-full bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-4 md:mr-4'
-          ]"
+    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+      <!-- Status Tabs -->
+      <div class="p-3 mt-6 mb-5 overflow-x-auto bg-white rounded-lg shadow-sm">
+        <div class="flex space-x-2">
+          <button 
+            v-for="tab in statusTabs" 
+            :key="tab.id"
+            @click="setActiveStatus(tab.id)"
+            :class="[
+              'px-4 py-2.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
+              tab.active 
+                ? 'bg-blue-50 text-blue-600' 
+                : 'text-gray-600 hover:bg-gray-50'
+            ]"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+      </div>
+      
+      <!-- Simple filter toggle button (for mobile) -->
+      <div class="p-4 mb-5 bg-white rounded-lg shadow-sm md:hidden">
+        <button 
+          @click="toggleSidebar" 
+          class="flex w-full items-center justify-between text-sm font-medium text-gray-700 focus:outline-none"
         >
-          <div class="p-4">
-            <h2 class="mb-4 text-lg font-medium">Advanced Filters</h2>
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <span>Advanced Filters</span>
+          </div>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="18" 
+            height="18" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="ml-2 transition-transform" 
+            :class="{ 'rotate-180': showSidebar }"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Filters panel (for mobile) -->
+      <div v-if="showSidebar" class="p-5 mb-5 bg-white rounded-lg shadow-sm md:hidden">
+        <div class="space-y-5">
+          <!-- Date Range Picker -->
+          <div class="mb-6">
+            <h3 class="mb-3 text-sm font-medium text-gray-700">Date Range</h3>
+            <div class="space-y-4">
+              <div>
+                <label for="startDateMobile" class="block mb-2 text-sm text-gray-500">From</label>
+                <input
+                  id="startDateMobile"
+                  type="date"
+                  v-model="dateRange.startDate"
+                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
+                />
+              </div>
+              <div>
+                <label for="endDateMobile" class="block mb-2 text-sm text-gray-500">To</label>
+                <input
+                  id="endDateMobile"
+                  type="date"
+                  v-model="dateRange.endDate"
+                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Text filters -->
+          <div class="space-y-5">
+            <div v-for="filter in filters" :key="filter.id" class="space-y-2">
+              <label :for="filter.id + 'Mobile'" class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
+              
+              <select
+                v-if="filter.type === 'select'"
+                :id="filter.id + 'Mobile'"
+                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                :value="filter.value"
+                @change="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLSelectElement).value } : f))"
+              >
+                <option value="">Select {{ filter.label }}</option>
+                <option
+                  v-for="option in filter.options"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              
+              <input
+                v-else
+                :id="filter.id + 'Mobile'"
+                type="text"
+                :placeholder="filter.placeholder || `Enter ${filter.label}`"
+                class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                :value="filter.value"
+                @input="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLInputElement).value } : f))"
+              />
+            </div>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex flex-col mt-6 space-y-3">
+            <button 
+              @click="handleSearch" 
+              class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Apply Filters
+            </button>
+            
+            <button 
+              @click="handleReset" 
+              class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M2 12C2 6.48 6.48 2 12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12"></path>
+                <path d="M8 12H16"></path>
+              </svg>
+              Reset
+            </button>
+        </div>
+      </div>
+    </div>
+    
+      <div class="flex flex-col md:flex-row md:space-x-5">
+        <!-- Side Panel with filters (only visible on desktop) -->
+        <div 
+          class="hidden md:block md:w-80 bg-white shadow-sm md:sticky md:top-16 md:self-start h-auto flex-shrink-0 mb-5 rounded-lg"
+        >
+          <div class="p-5">
+            <h2 class="mb-5 text-lg font-medium">Advanced Filters</h2>
             
             <!-- Date Range Picker -->
             <div class="mb-6">
-              <h3 class="mb-2 text-sm font-medium text-gray-700">Date Range</h3>
-              <div class="space-y-3">
+              <h3 class="mb-3 text-sm font-medium text-gray-700">Date Range</h3>
+              <div class="space-y-4">
                 <div>
-                  <label for="startDate" class="block mb-1 text-sm text-gray-500">From</label>
+                  <label for="startDate" class="block mb-2 text-sm text-gray-500">From</label>
                   <input
                     id="startDate"
                     type="date"
                     v-model="dateRange.startDate"
-                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                   />
                 </div>
                 <div>
-                  <label for="endDate" class="block mb-1 text-sm text-gray-500">To</label>
+                  <label for="endDate" class="block mb-2 text-sm text-gray-500">To</label>
                   <input
                     id="endDate"
                     type="date"
                     v-model="dateRange.endDate"
-                    class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     @change="updateDateRange(dateRange.startDate, dateRange.endDate)"
                   />
                 </div>
@@ -371,14 +505,14 @@ onUnmounted(() => {
             </div>
             
             <!-- Text filters -->
-            <div class="space-y-4">
-              <div v-for="filter in filters" :key="filter.id" class="space-y-1">
+            <div class="space-y-5">
+              <div v-for="filter in filters" :key="filter.id" class="space-y-2">
                 <label :for="filter.id" class="block text-sm font-medium text-gray-700">{{ filter.label }}</label>
                 
                 <select
                   v-if="filter.type === 'select'"
                   :id="filter.id"
-                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @change="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLSelectElement).value } : f))"
                 >
@@ -397,7 +531,7 @@ onUnmounted(() => {
                   :id="filter.id"
                   type="text"
                   :placeholder="filter.placeholder || `Enter ${filter.label}`"
-                  class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  class="block w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   :value="filter.value"
                   @input="(e) => handleFilterUpdate(filters.map(f => f.id === filter.id ? { ...f, value: (e.target as HTMLInputElement).value } : f))"
                 />
@@ -405,10 +539,10 @@ onUnmounted(() => {
             </div>
             
             <!-- Buttons -->
-            <div class="flex flex-col mt-6 space-y-2">
+            <div class="flex flex-col mt-8 space-y-3">
               <button 
                 @click="handleSearch" 
-                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <circle cx="11" cy="11" r="8"></circle>
@@ -419,7 +553,7 @@ onUnmounted(() => {
               
               <button 
                 @click="handleReset" 
-                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="inline-flex items-center justify-center w-full px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                   <path d="M2 12C2 6.48 6.48 2 12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12"></path>
@@ -427,51 +561,24 @@ onUnmounted(() => {
                 </svg>
                 Reset
               </button>
-              
-              <!-- Close sidebar button (mobile only) -->
-              <button 
-                @click="toggleSidebar" 
-                class="inline-flex items-center justify-center w-full px-4 py-2 mt-4 text-sm font-medium text-gray-500 transition-colors rounded-md md:hidden bg-gray-50 hover:bg-gray-100 focus:outline-none"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
         
         <!-- Main content area -->
         <div class="flex-1">
-          <!-- Status Tabs - now aligned with card content, not full width -->
-          <div class="p-2 mb-4 overflow-x-auto bg-white rounded-lg shadow-sm">
-            <div class="flex space-x-1">
-              <button 
-                v-for="tab in statusTabs" 
-                :key="tab.id"
-                @click="setActiveStatus(tab.id)"
-                :class="[
-                  'px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
-                  tab.active 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                ]"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
-          </div>
-          
           <!-- Results area -->
           <div class="mt-0">
             <!-- Empty state with nice UI -->
-            <div v-if="filteredCusDecs.length === 0" class="py-8 text-center text-gray-500 bg-white rounded-lg shadow-sm">
+            <div v-if="filteredCusDecs.length === 0" class="py-10 text-center text-gray-500 bg-white rounded-lg shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-400">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="8" y1="12" x2="16" y2="12"></line>
               </svg>
-              <p>No CusDec records found matching your filters</p>
+              <p class="mb-4">No CusDec records found matching your filters</p>
               <button 
                 @click="handleReset" 
-                class="px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+                class="px-5 py-2.5 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
               >
                 Reset Filters
               </button>
@@ -479,27 +586,26 @@ onUnmounted(() => {
             
             <div v-else>
               <!-- Results count indicator -->
-              <div class="flex flex-col mb-4 space-y-2 md:flex-row md:items-center md:justify-between">
-                <p class="text-sm text-gray-500">Found {{ filteredCusDecs.length }} CusDec records</p>
-                
+              <div class="flex flex-col mb-5 md:flex-row md:items-center md:justify-between">
+                <p class="text-sm text-gray-500 mb-2 md:mb-0">Found {{ filteredCusDecs.length }} CusDec records</p>
               </div>
               
               <!-- Card-based layout for all screen sizes -->
-              <div class="w-full space-y-4">
-                <CusDecCard
-                  v-for="cusdec in paginatedCusDecs"
-                  :key="cusdec.id"
-                  :cusdec="cusdec"
+              <div class="w-full space-y-5">
+              <CusDecCard
+                v-for="cusdec in paginatedCusDecs"
+                :key="cusdec.id"
+                :cusdec="cusdec"
                   @view-details="handleViewDetails" 
-                  class="mb-4" 
+                  class="mb-5" 
                 />
                 
                 <!-- Load More button (mobile only) -->
-                <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-6 mb-20">
+                <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-8 mb-20">
                   <button 
                     @click="loadMoreItems"
                     :disabled="isLoadingMore"
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
                   >
                     <template v-if="isLoadingMore">
                       <svg class="w-5 h-5 mr-2 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -515,12 +621,12 @@ onUnmounted(() => {
                 </div>
                 
                 <!-- Pagination (desktop only) -->
-                <div v-if="!isMobile" class="flex justify-center mt-6">
+                <div v-if="!isMobile" class="flex justify-center mt-8">
                   <nav class="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                     <button 
                       @click="handlePageChange(currentPage - 1)" 
                       :disabled="currentPage === 1"
-                      class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="inline-flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span class="sr-only">Previous</span>
                       <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -533,7 +639,7 @@ onUnmounted(() => {
                       :key="page" 
                       @click="handlePageChange(page)" 
                       :class="[
-                        'inline-flex items-center px-4 py-2 text-sm font-medium border',
+                        'inline-flex items-center px-4 py-2.5 text-sm font-medium border',
                         currentPage === page 
                           ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
                           : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
@@ -545,7 +651,7 @@ onUnmounted(() => {
                     <button 
                       @click="handlePageChange(currentPage + 1)" 
                       :disabled="currentPage === totalPages"
-                      class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="inline-flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span class="sr-only">Next</span>
                       <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -555,7 +661,7 @@ onUnmounted(() => {
                   </nav>
                 </div>
                 
-                <div v-if="!isMobile" class="flex items-center justify-center mt-2">
+                <div v-if="!isMobile" class="flex items-center justify-center mt-3">
                   <p class="text-sm text-gray-500">
                     Showing 
                     <span class="font-medium">{{ ((currentPage - 1) * itemsPerPage) + 1 }}</span> 
@@ -579,52 +685,56 @@ onUnmounted(() => {
     <!-- Detail modal -->
     <div 
       v-if="showDetails" 
-      class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50"
+      class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
     >
-      <div class="w-full max-w-2xl p-0 mx-4 overflow-hidden bg-white rounded-lg shadow-lg">
-        <div class="flex items-center justify-between p-4 border-b">
+      <div class="w-full max-w-2xl p-0 mx-4 overflow-hidden bg-white rounded-lg shadow-xl">
+        <div class="flex items-center justify-between p-5 border-b">
           <h3 class="text-lg font-semibold text-gray-900">CusDec Details</h3>
-          <button @click="handleCloseDetails" class="p-1 text-gray-500 hover:text-gray-700 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button @click="handleCloseDetails" class="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
         
-        <div class="p-4 space-y-6">
-          <div v-if="cusDecDetails" class="grid grid-cols-2 gap-4">
-            <div>
-              <p class="text-sm text-gray-500">CusDec Number</p>
-              <p class="font-medium">{{ cusDecDetails.cusdecNumber }}</p>
+        <div class="p-6 space-y-6">
+          <div v-if="selectedItem" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">CusDec Number</p>
+              <p class="font-medium">{{ selectedItem.cusdecNumber }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Status</p>
-              <p class="font-medium">{{ cusDecDetails.status }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Status</p>
+              <p class="font-medium">
+                <span :class="getStatusBadgeClass(selectedItem.status)">
+                  {{ selectedItem.status }}
+                </span>
+              </p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Consignee</p>
-              <p class="font-medium">{{ cusDecDetails.consigneeName }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Consignee</p>
+              <p class="font-medium">{{ selectedItem.consigneeName }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Declarant</p>
-              <p class="font-medium">{{ cusDecDetails.declarantName }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Declarant</p>
+              <p class="font-medium">{{ selectedItem.declarantName }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Invoice Value</p>
-              <p class="font-medium">{{ cusDecDetails.invoiceValue }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Invoice Value</p>
+              <p class="font-medium">{{ selectedItem.invoiceValue }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Origin Country</p>
-              <p class="font-medium">{{ cusDecDetails.originCountry }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Origin Country</p>
+              <p class="font-medium">{{ selectedItem.originCountry }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Container Count</p>
-              <p class="font-medium">{{ cusDecDetails.containerCount }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Container Count</p>
+              <p class="font-medium">{{ selectedItem.containerCount }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Incoterm</p>
-              <p class="font-medium">{{ cusDecDetails.incoterm }}</p>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <p class="text-sm text-gray-500 mb-1">Incoterm</p>
+              <p class="font-medium">{{ selectedItem.incoterm }}</p>
             </div>
           </div>
         </div>
