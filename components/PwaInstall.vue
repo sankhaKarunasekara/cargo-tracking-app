@@ -28,55 +28,45 @@ interface NuxtAppWithPwa {
 // Safely check if installable
 const checkInstallable = () => {
   try {
-    console.log('PwaInstall Component: Checking if app is installable')
     return (nuxtApp as unknown as NuxtAppWithPwa).$pwaInstall.checkInstallable()
   } catch (error) {
-    console.error('PwaInstall Component: Error checking installability', error)
     return false
   }
 }
 
 const installPwa = () => {
-  console.log('PwaInstall Component: Install button clicked')
   try {
     // @ts-ignore - We know this exists because our plugin provides it
     (nuxtApp as unknown as NuxtAppWithPwa).$pwaInstall.showPrompt()
   } catch (error) {
-    console.error('PwaInstall Component: Error showing install prompt', error)
+    // Installation failed
   }
 }
 
 onMounted(() => {
-  console.log('PwaInstall Component: Mounted')
-  
   // Check if the app is already installed
   if (window.matchMedia('(display-mode: standalone)').matches || 
       window.matchMedia('(display-mode: fullscreen)').matches) {
     // App is already installed
-    console.log('PwaInstall Component: App is already installed')
     shouldShow.value = false
   } else {
-    console.log('PwaInstall Component: App is not installed, checking if installable')
     // App is not installed - check if we have an install prompt
     shouldShow.value = !!nuxtApp.payload.pwaInstallPrompt
     
     // Listen for when the install prompt is available
-    window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('PwaInstall Component: beforeinstallprompt event received')
+    window.addEventListener('beforeinstallprompt', () => {
       shouldShow.value = true
     })
     
     // Force check after a short delay
     setTimeout(() => {
       shouldShow.value = checkInstallable()
-      console.log('PwaInstall Component: Delayed check, installable:', shouldShow.value)
     }, 2000)
   }
 })
 
 // Watch for changes in installability
 watch(() => nuxtApp.payload.pwaInstallPrompt, (newVal) => {
-  console.log('PwaInstall Component: Install prompt changed', !!newVal)
   shouldShow.value = !!newVal
 })
 </script> 

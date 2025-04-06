@@ -4,28 +4,10 @@ import Navbar from '../components/Navbar.vue'
 import AppSidebar from '../components/AppSidebar.vue'
 import PwaInstall from '../components/PwaInstall.vue'
 import { SidebarProvider, useSidebar } from '../components/ui/sidebar'
-import { useNuxtApp } from '#app'
 
 // Simple device detection
 const isMobile = ref(false)
 const showDesktopSidebar = ref(true)
-const nuxtApp = useNuxtApp()
-
-// Debug function to manually trigger PWA installation
-const debugTriggerPwaInstall = () => {
-  console.log('Debug: Manual trigger of PWA install')
-  try {
-    // @ts-ignore
-    if (nuxtApp.$pwaInstall && nuxtApp.$pwaInstall.showPrompt) {
-      // @ts-ignore
-      nuxtApp.$pwaInstall.showPrompt()
-    } else {
-      console.log('Debug: $pwaInstall.showPrompt not available')
-    }
-  } catch (error) {
-    console.error('Error triggering PWA install', error)
-  }
-}
 
 // Check if the device is mobile
 const checkDevice = () => {
@@ -67,12 +49,12 @@ onUnmounted(() => {
         :show-desktop-sidebar="showDesktopSidebar" 
       />
       
-      <div class="relative overflow-hidden flex-1">
+      <div class="relative flex-1 overflow-hidden">
         <!-- Sidebar toggle button for desktop when sidebar is hidden -->
         <button
           v-if="!isMobile && !showDesktopSidebar"
           @click="toggleDesktopSidebar"
-          class="fixed left-0 top-20 z-20 bg-white shadow-md rounded-r-lg p-2"
+          class="fixed left-0 z-20 p-2 bg-white rounded-r-lg shadow-md top-20"
           aria-label="Show sidebar"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
@@ -86,14 +68,6 @@ onUnmounted(() => {
         <main class="h-[calc(100vh-64px)] overflow-y-auto pb-16 md:pb-0">
           <slot />
         </main>
-        
-        <!-- Debug button for PWA install -->
-        <button 
-          @click="debugTriggerPwaInstall" 
-          class="fixed top-20 right-4 bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2 rounded z-50"
-        >
-          Debug: Install PWA
-        </button>
       </div>
       
       <!-- PWA Install Button -->
