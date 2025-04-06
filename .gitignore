@@ -1,9 +1,14 @@
 node_modules
 cargo-tracking-app-v0.1.1.zip
 cargo-tracking-app-v0.1.0.zip
-.nuxt
+.nuxt/**
 .env
 .env.local
 .env.development
 .env.production
 .env.test
+.nuxt/nitro.json
+.nuxt/manifest/meta/dev.json
+.nuxt/nuxt.d.ts
+.nuxt/dev/index.mjs
+.nuxt/manifest/latest.json
