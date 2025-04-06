@@ -4,6 +4,7 @@ import FilterSection from '../components/FilterSection.vue'
 import ContainerCard from '../components/ContainerCard.vue'
 import Pagination from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
+import StatusTimelineSheet from '../components/StatusTimelineSheet.vue'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
 
 // Get window size and mobile status
@@ -133,6 +134,14 @@ const selectedContainer = ref(null)
 const showDetailsModal = ref(false)
 const showFilters = ref(false)
 
+// Timeline sheet state
+const timelineSheetOpen = ref(false)
+const selectedTimelineItem = ref({
+  id: '',
+  type: 'container',
+  status: ''
+})
+
 // Filter containers based on filters and active status
 const filteredContainers = computed(() => {
   return allContainers.value.filter(container => {
@@ -208,6 +217,16 @@ const handleFilterUpdate = (updatedFilters: any[]) => {
 const handleViewDetails = (container: any) => {
   selectedContainer.value = container
   showDetailsModal.value = true
+}
+
+// Handle view timeline
+const handleViewTimeline = (container: any) => {
+  selectedTimelineItem.value = {
+    id: container.number,
+    type: 'container',
+    status: container.status
+  }
+  timelineSheetOpen.value = true
 }
 
 // Toggle filters visibility
@@ -325,6 +344,7 @@ onUnmounted(() => {
               :key="container.id"
               :container="container"
               @viewDetails="handleViewDetails"
+              @viewTimeline="handleViewTimeline"
               class="mb-5"
             />
           </div>
@@ -363,5 +383,13 @@ onUnmounted(() => {
     
     <!-- Bottom navigation -->
     <AppBottomNavigation />
+    
+    <!-- Status Timeline Sheet -->
+    <StatusTimelineSheet
+      v-model:isOpen="timelineSheetOpen"
+      :itemId="selectedTimelineItem.id"
+      :itemType="selectedTimelineItem.type"
+      :status="selectedTimelineItem.status"
+    />
   </div>
 </template> 

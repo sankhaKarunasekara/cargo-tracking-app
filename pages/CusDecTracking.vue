@@ -6,6 +6,7 @@ import { Pagination } from '../components/ui/pagination'
 import AppBottomNavigation from '../components/AppBottomNavigation.vue'
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
+import StatusTimelineSheet from '../components/StatusTimelineSheet.vue'
 import { useRouter } from 'vue-router'
 import { useWindowSize } from '../lib/hooks/useWindowSize'
 import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
@@ -102,6 +103,14 @@ const selectedItem = ref<AnonymizedCusDecRecord | null>(null)
 // Sidebar and filter visibility state
 const showSidebar = ref(false)
 const showFilters = ref(false)
+
+// Timeline sheet state
+const timelineSheetOpen = ref(false)
+const selectedTimelineItem = ref({
+  id: '',
+  type: 'cusdec',
+  status: ''
+})
 
 // Set sidebar visibility based on screen size
 onMounted(() => {
@@ -285,6 +294,16 @@ const handleViewDetails = (cusdec: AnonymizedCusDecRecord) => {
 // Handle close details
 const handleCloseDetails = () => {
   showDetails.value = false
+}
+
+// Handle view timeline
+const handleViewTimeline = (cusdec: AnonymizedCusDecRecord) => {
+  selectedTimelineItem.value = {
+    id: cusdec.cusdecNumber,
+    type: 'cusdec',
+    status: cusdec.status
+  }
+  timelineSheetOpen.value = true
 }
 
 // Add table headers for desktop view
@@ -596,9 +615,10 @@ const formatDate = (dateString: string) => {
                 v-for="cusdec in paginatedCusDecs"
                 :key="cusdec.id"
                 :cusdec="cusdec"
-                  @view-details="handleViewDetails" 
-                  class="mb-5" 
-                />
+                @view-details="handleViewDetails" 
+                @view-timeline="handleViewTimeline"
+                class="mb-5" 
+              />
                 
                 <!-- Load More button (mobile only) -->
                 <div v-if="hasMoreItems && isMobile" class="flex justify-center mt-8 mb-20">
@@ -740,5 +760,13 @@ const formatDate = (dateString: string) => {
         </div>
       </div>
     </div>
+    
+    <!-- Status Timeline Sheet -->
+    <StatusTimelineSheet
+      v-model:isOpen="timelineSheetOpen"
+      :itemId="selectedTimelineItem.id"
+      :itemType="selectedTimelineItem.type"
+      :status="selectedTimelineItem.status"
+    />
   </div>
 </template> 

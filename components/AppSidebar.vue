@@ -46,16 +46,13 @@ const isActive = (path: string) => {
 <template>
   <div class="fixed top-0 left-0 z-10 flex flex-col flex-shrink-0 w-64 h-screen overflow-y-auto bg-white border-r border-gray-200 sidebar">
     <div class="p-4 border-b border-gray-100">
-      <div class="flex items-center space-x-2">
-        <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
-            <path d="M10 2a2 2 0 1 0 4 0"/>
-          </svg>
+      <div class="flex items-center">
+        <img src="/customs-logo.png" alt="Sri Lanka Customs Logo" class="w-12 h-12" />
+        <div class="ml-3">
+          <div class="text-lg font-bold text-blue-600">CDNS</div>
+          <div class="text-xs text-gray-500">Sri Lanka Customs</div>
         </div>
-        <span class="text-lg font-bold text-blue-600">CargoTrack</span>
       </div>
-      <div class="mt-1 text-xs text-gray-500">Shipping Management</div>
     </div>
     
     <!-- Navigation Section Header -->

@@ -1,45 +1,48 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import StatusTimelineSheet from './StatusTimelineSheet.vue'
 
 const props = defineProps<{
   type?: string;
   id?: string | number;
   status?: string;
   className?: string;
+  compact?: boolean;
 }>()
 
-const router = useRouter()
+const isTimelineOpen = ref(false)
 
 const openTimeline = () => {
-  const query: Record<string, string> = {}
-  
-  if (props.type) query.type = props.type.toString()
-  if (props.id !== undefined) query.id = props.id.toString()
-  if (props.status) query.status = props.status.toString()
-  
-  router.push({
-    path: '/StatusTimelinePage',
-    query
-  })
+  isTimelineOpen.value = true
 }
 </script>
 
 <template>
-  <button 
-    @click="openTimeline"
-    :class="[
-      'track-button inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md',
-      'text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50',
-      className
-    ]"
-    type="button"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 track-icon">
-      <circle cx="12" cy="12" r="10"></circle>
-      <polyline points="12 6 12 12 16 14"></polyline>
-    </svg>
-    <span>Track Progress</span>
-  </button>
+  <div>
+    <button 
+      @click="openTimeline"
+      :class="[
+        'track-button inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md',
+        'text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50',
+        className
+      ]"
+      type="button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="track-icon" :class="{ 'mr-2': !compact }">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span v-if="!compact">Track Progress</span>
+      <span v-else>Track</span>
+    </button>
+    
+    <StatusTimelineSheet
+      v-model:isOpen="isTimelineOpen"
+      :itemId="id?.toString() || ''"
+      :itemType="type || 'cusdec'"
+      :status="status || ''"
+    />
+  </div>
 </template>
 
 <style scoped>

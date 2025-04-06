@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     ],
   },
 
-  modules: ['shadcn-nuxt'],
+  modules: ['shadcn-nuxt', '@nuxt/image'],
 
   // @ts-ignore - shadcn-nuxt adds this property but TypeScript doesn't know about it
   shadcn: {

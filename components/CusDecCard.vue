@@ -6,9 +6,15 @@ import { ref, computed } from 'vue'
 import { AnonymizedCusDecRecord } from '../lib/data/anonymizedCusDecData'
 import { useRouter } from 'vue-router'
 
+// Add additional type information to support the component properties
+interface ExtendedCusDecRecord extends AnonymizedCusDecRecord {
+  countryOfExport?: string;
+  destination?: string;
+}
+
 // Define the props
 interface Props {
-  cusdec: AnonymizedCusDecRecord;
+  cusdec: ExtendedCusDecRecord;
 }
 
 const props = defineProps<Props>();
@@ -16,13 +22,25 @@ const router = useRouter();
 
 // Define the emits
 const emit = defineEmits<{
-  'view-details': [cusdec: AnonymizedCusDecRecord];
+  'view-details': [cusdec: ExtendedCusDecRecord];
+  'view-timeline': [cusdec: ExtendedCusDecRecord];
+  'acknowledge': [cusdec: ExtendedCusDecRecord];
 }>();
 
 // Method to handle view details click
 const handleViewDetails = () => {
   emit('view-details', props.cusdec);
   router.push(`/cusdec/${props.cusdec.id}`);
+};
+
+// Method to handle view timeline click
+const handleViewTimeline = () => {
+  emit('view-timeline', props.cusdec);
+};
+
+// Method to handle acknowledge click
+const handleAcknowledge = () => {
+  emit('acknowledge', props.cusdec);
 };
 
 // Get default office code if not provided
@@ -50,6 +68,16 @@ const formattedDate = computed(() => {
 // Get container count with default
 const containerCount = computed(() => {
   return props.cusdec.containerCount || 0;
+});
+
+// Get country of export with default
+const countryOfExport = computed(() => {
+  return props.cusdec.countryOfExport || 'Singapore';
+});
+
+// Get destination with default
+const destination = computed(() => {
+  return props.cusdec.destination || 'Sri Lanka';
 });
 
 // Get channel color based on channel value
@@ -177,8 +205,49 @@ const features = {
       
       <!-- Card Content -->
       <div class="p-6 pt-4">
-        <!-- Channel and Container Stats -->
+        <!-- Container Count and Country of Export -->
         <div class="flex flex-wrap items-center gap-2 mb-4">
+          <!-- Container Count -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+            </svg>
+            {{ containerCount }} Container<span v-if="containerCount !== 1">s</span>
+          </div>
+          
+          <!-- Country of Export -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M12 12c2-2.96 0-7-1-8c0 3.038-1.773 4.741-3 6c-1.226 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.532-1.056-3.94-2-5c-1.786 3-2 4-4 2z"></path>
+            </svg>
+            {{ countryOfExport }}
+          </div>
+        </div>
+        
+        <!-- Company Info -->
+        <div class="space-y-2 text-sm">
+          <div class="flex">
+            <span class="flex-shrink-0 w-20 text-gray-500">Consignee:</span>
+            <span class="font-medium text-gray-700 truncate">{{ cusdec.consigneeName }}</span>
+          </div>
+          <div class="flex">
+            <span class="flex-shrink-0 w-20 text-gray-500">Declarant:</span>
+            <span class="font-medium text-gray-700 truncate">{{ cusdec.declarantName }}</span>
+          </div>
+        </div>
+        
+        <!-- Channel and Destination (bottom of content) -->
+        <div class="flex flex-wrap items-center gap-2 mt-4">
+          <!-- Destination -->
+          <div class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {{ destination }}
+          </div>
+          
           <!-- Channel - shown only if not "Waiting Confirmation" -->
           <div 
             v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
@@ -195,94 +264,62 @@ const features = {
             </svg>
             Channel {{ channel.toUpperCase() }}
           </div>
-          
-          <!-- Container Count -->
-          <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-              <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
-            </svg>
-            {{ containerCount }} Container<span v-if="containerCount !== 1">s</span>
-          </div>
-        </div>
-        
-        <!-- Company Info -->
-        <div class="space-y-2 text-sm">
-          <div class="flex">
-            <span class="w-20 flex-shrink-0 text-gray-500">Consignee:</span>
-            <span class="font-medium text-gray-700 truncate">{{ cusdec.consigneeName }}</span>
-          </div>
-          <div class="flex">
-            <span class="w-20 flex-shrink-0 text-gray-500">Declarant:</span>
-            <span class="font-medium text-gray-700 truncate">{{ cusdec.declarantName }}</span>
-          </div>
         </div>
       </div>
       
-      <!-- Card Footer -->
-      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
-        <div class="flex flex-col items-center justify-end gap-2 sm:flex-row">
-          <button 
-            @click="handleViewDetails"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 sm:w-auto"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg"
-              width="15" 
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="mr-2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            More Info
-          </button>
-          
-          <!-- Status Timeline Button -->
-          <StatusTimelineButton 
-            type="cusdec"
-            :id="cusdec.id"
-            :status="cusdec.status"
-            class="w-full sm:w-auto"
-          />
-          
-          <!-- Show Accept button when status is Waiting Confirmation, otherwise show View Status -->
-          <button 
+      <!-- Mobile Card Layout Footer -->
+      <div class="flex items-center justify-between px-6 py-4 bg-gray-50">
+        <!-- Progress stages -->
+        <div class="flex items-center">
+          <div class="text-xs font-medium text-gray-600">{{ processingStage }}</div>
+        </div>
+        
+        <!-- Action buttons -->
+        <div class="flex space-x-2">
+          <!-- Show Acknowledge button for Waiting Confirmation status -->
+          <ButtonComponent
             v-if="cusdec.status.toLowerCase() === 'waiting confirmation'"
-            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-md shadow-sm hover:bg-green-700 sm:w-auto"
+            variant="primary"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click="handleAcknowledge"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="15" 
-              height="15" 
-              viewBox="0 0 24 24" 
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="mr-2"
-            >
-              <path d="M20 6L9 17l-5-5" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M20 6L9 17l-5-5"></path>
             </svg>
             Acknowledge
+          </ButtonComponent>
+          
+          <!-- Show Timeline button only if not in "Waiting Confirmation" status -->
+          <button 
+            v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
+            @click="handleViewTimeline"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium transition-colors rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Timeline
           </button>
+          
+          <ButtonComponent
+            variant="custom"
+            class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            @click="handleViewDetails"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"></path>
+            </svg>
+            View
+          </ButtonComponent>
         </div>
       </div>
     </div>
     
     <!-- Desktop Card Layout (display only on large screens) -->
     <div class="hidden lg:flex">
-      <div class="flex-grow p-6 min-w-0">
+      <div class="flex-grow min-w-0 p-6">
         <div class="flex items-start gap-4">
           <!-- Left: Document icon and CusDec number -->
           <div class="flex items-start min-w-0">
@@ -312,8 +349,49 @@ const features = {
         </div>
         
         <div class="mt-4">
-          <!-- Channel and Container Stats -->
+          <!-- Container Stats and Country of Export -->
           <div class="flex flex-wrap items-center gap-2 mb-4">
+            <!-- Container Count -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
+              </svg>
+              {{ containerCount }} Container<span v-if="containerCount !== 1">s</span>
+            </div>
+            
+            <!-- Country of Export -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <path d="M12 12c2-2.96 0-7-1-8c0 3.038-1.773 4.741-3 6c-1.226 1.26-2 3.24-2 5a6 6 0 1 0 12 0c0-1.532-1.056-3.94-2-5c-1.786 3-2 4-4 2z"></path>
+              </svg>
+              {{ countryOfExport }}
+            </div>
+          </div>
+          
+          <!-- Company Info -->
+          <div class="space-y-2 text-sm">
+            <div class="flex min-w-0">
+              <span class="flex-shrink-0 w-20 text-gray-500">Consignee:</span>
+              <span class="font-medium text-gray-700 truncate">{{ cusdec.consigneeName }}</span>
+            </div>
+            <div class="flex min-w-0">
+              <span class="flex-shrink-0 w-20 text-gray-500">Declarant:</span>
+              <span class="font-medium text-gray-700 truncate">{{ cusdec.declarantName }}</span>
+            </div>
+          </div>
+          
+          <!-- Channel and Destination (bottom of content) -->
+          <div class="flex flex-wrap items-center gap-2 mt-4">
+            <!-- Destination -->
+            <div class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-medium whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              {{ destination }}
+            </div>
+            
             <!-- Channel - shown only if not "Waiting Confirmation" -->
             <div 
               v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
@@ -330,87 +408,73 @@ const features = {
               </svg>
               Channel {{ channel.toUpperCase() }}
             </div>
-            
-            <!-- Container Count -->
-            <div class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium whitespace-nowrap">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="mr-1">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M13 4a1 1 0 0 1 1 1h4a1 1 0 0 1 .783 .378l.074 .108l3 5l.055 .103l.04 .107l.029 .109l.016 .11l.003 .085v6a1 1 0 0 1 -1 1h-1.171a3.001 3.001 0 0 1 -5.658 0h-4.342a3.001 3.001 0 0 1 -5.658 0h-1.171a1 1 0 0 1 -1 -1v-11a2 2 0 0 1 2 -2zm-6 12a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m10 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2m.434 -9h-3.434v3h5.234z" />
-              </svg>
-              {{ containerCount }} Container<span v-if="containerCount !== 1">s</span>
-            </div>
-          </div>
-          
-          <!-- Company Info -->
-          <div class="space-y-2 text-sm">
-            <div class="flex min-w-0">
-              <span class="w-20 text-gray-500 flex-shrink-0">Consignee:</span>
-              <span class="font-medium text-gray-700 truncate">{{ cusdec.consigneeName }}</span>
-            </div>
-            <div class="flex min-w-0">
-              <span class="w-20 text-gray-500 flex-shrink-0">Declarant:</span>
-              <span class="font-medium text-gray-700 truncate">{{ cusdec.declarantName }}</span>
-            </div>
           </div>
         </div>
       </div>
       
       <!-- Right Column for Action Buttons -->
-      <div class="flex flex-col justify-center w-56 gap-3 p-6 border-l border-gray-100 bg-gray-50 flex-shrink-0">
-        <button 
-          @click="handleViewDetails"
-          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg"
-            width="15" 
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="mr-2"
+      <div class="flex flex-col justify-center flex-shrink-0 w-56 p-6 border-l border-gray-100 bg-gray-50">
+        <div class="flex flex-col gap-3">
+          <!-- Show Acknowledge button for Waiting Confirmation status -->
+          <ButtonComponent
+            v-if="cusdec.status.toLowerCase() === 'waiting confirmation'"
+            variant="primary"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+            @click="handleAcknowledge"
           >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          More Info
-        </button>
-        
-        <!-- Status Timeline Button -->
-        <StatusTimelineButton 
-          type="cusdec"
-          :id="cusdec.id"
-          :status="cusdec.status"
-          class="w-full sm:w-auto"
-        />
-        
-        <!-- Show Accept button when status is Waiting Confirmation, otherwise show View Status -->
-        <button 
-          v-if="cusdec.status.toLowerCase() === 'waiting confirmation'"
-          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-md shadow-sm hover:bg-green-700 sm:w-auto"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="15" 
-            height="15" 
-            viewBox="0 0 24 24" 
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="mr-2"
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              width="15" 
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            Acknowledge
+          </ButtonComponent>
+          
+          <!-- Show Timeline button only if not in "Waiting Confirmation" status -->
+          <button 
+            v-if="cusdec.status.toLowerCase() !== 'waiting confirmation'"
+            @click="handleViewTimeline"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50"
           >
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          Acknowledge
-        </button>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg"
+              width="15" 
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <path d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Timeline
+          </button>
+          
+          <ButtonComponent
+            variant="custom"
+            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-blue-700 transition-colors border border-transparent rounded-md shadow-sm bg-blue-50 hover:bg-blue-100"
+            @click="handleViewDetails"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"></path>
+            </svg>
+            Details
+          </ButtonComponent>
+        </div>
       </div>
     </div>
   </Card>
