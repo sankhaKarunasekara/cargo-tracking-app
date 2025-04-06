@@ -1,42 +1,52 @@
-# Cargo Tracking App
+# Cargo Tracking App v0.1.0
 
-A modern application for tracking cargo shipments and deliveries. This app provides real-time tracking information, shipment history, and delivery estimates.
+A modern web application for tracking cargo containers and customs declarations (CusDecs) in a streamlined, user-friendly interface.
 
 ## Features
 
-- Track shipments with tracking number
-- View shipment history and status
-- Estimated delivery times
-- Notification system
-- User authentication
+### Current Release (v0.1.0)
 
-## Tech Stack
+- **Container Tracking**: Monitor cargo containers with detailed status information
+- **CusDec Tracking**: Track customs declarations through the clearance process
+- **Filtering System**: Advanced filters for finding specific containers or declarations
+- **Status Timeline**: View history and current status of containers and declarations
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **Status Tabs**: Quick filtering by processing status
 
-- **Framework**: Nuxt 3
-- **UI Components**: shadcn-vue
-- **Styling**: Tailwind CSS
-- **Language**: TypeScript
+## Technology Stack
 
-## Setup
+- Vue 3 (Composition API)
+- TypeScript
+- Tailwind CSS
+- Vue Router
+
+## Screenshots
+
+*Screenshots will be added in future releases*
+
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/cargo-tracking-app.git
+
+# Navigate to project directory
+cd cargo-tracking-app
+
 # Install dependencies
-pnpm install
+npm install
 
-# Run development server
-pnpm dev
-
-# Build for production
-pnpm build
+# Start the development server
+npm run dev
 ```
 
-## Project Structure
+## Roadmap
 
-- `components/` - UI components 
-- `pages/` - Application pages and routes
-- `assets/` - Static assets
-- `components/ui/` - shadcn-vue components
+- **v0.2.0**: Add dashboard and analytics features
+- **v0.3.0**: Implement user authentication and permissions
+- **v0.4.0**: Add notifications system for status changes
+- **v1.0.0**: Full production release with documentation
 
-## Contributing
+## License
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+MIT
