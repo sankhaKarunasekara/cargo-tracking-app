@@ -84,14 +84,13 @@ onMounted(() => {
   // Check if screen is larger than mobile (md breakpoint)
   const isDesktop = window.innerWidth >= 768
 
-  // For mobile view, always start with sidebar hidden
+  // For mobile view, start with filters hidden
   if (!isDesktop) {
     showSidebar.value = false
-    showFilters.value = true
+    showFilters.value = false
   } else {
-    // For desktop, always show the sidebar in the UI
+    // For desktop, show both sidebar and filters
     showSidebar.value = true
-    // But keep filters expanded initially
     showFilters.value = true
   }
 
@@ -101,9 +100,11 @@ onMounted(() => {
     if (isDesktopNow && !isMobile.value) {
       // Transitioning to desktop
       showSidebar.value = true
+      showFilters.value = true
     } else if (!isDesktopNow && isMobile.value) {
-      // Transitioning to mobile - hide sidebar by default
+      // Transitioning to mobile - hide both
       showSidebar.value = false
+      showFilters.value = false
     }
   }
 

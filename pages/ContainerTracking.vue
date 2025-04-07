@@ -236,6 +236,28 @@ const scrollToContainerList = () => {
 onMounted(() => {
   document.addEventListener('toggle-filters', toggleFilters)
 
+  // Check if screen is larger than mobile (lg breakpoint)
+  const isDesktop = window.innerWidth >= 1024
+
+  // Set initial filter visibility based on screen size
+  if (isDesktop) {
+    showFilters.value = true
+  } else {
+    showFilters.value = false
+  }
+
+  // Add resize listener to update visibility
+  const handleResize = () => {
+    const isDesktopNow = window.innerWidth >= 1024
+    if (isDesktopNow && !isMobile.value) {
+      showFilters.value = true
+    } else if (!isDesktopNow && isMobile.value) {
+      showFilters.value = false
+    }
+  }
+
+  window.addEventListener('resize', handleResize)
+
   // Ensure we have a cusdec filter
   if (!filters.value.some(f => f.id === 'cusdec')) {
     filters.value.push({
@@ -258,8 +280,8 @@ onMounted(() => {
       // Apply the filter immediately
       handleSearch()
 
-      // Keep filters expanded
-      showFilters.value = true
+      // Keep filters expanded only on desktop
+      showFilters.value = isDesktop
 
       // Reset pagination
       currentPage.value = 1
@@ -268,6 +290,11 @@ onMounted(() => {
       // Scroll to container list
       scrollToContainerList();
     }
+  }
+
+  return () => {
+    window.removeEventListener('resize', handleResize)
+    document.removeEventListener('toggle-filters', toggleFilters)
   }
 })
 
