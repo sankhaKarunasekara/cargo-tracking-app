@@ -12,7 +12,7 @@
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900">Install Customs App</p>
+          <p class="text-sm font-medium text-gray-900">Install CDNS App</p>
           <p class="text-xs text-gray-500 truncate">Add to your home screen for quick access</p>
         </div>
       </div>
